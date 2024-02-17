@@ -1,0 +1,37 @@
+﻿Program ::= FunctionList
+FunctionList ::= Function FunctionList | null
+Function ::= ReturnType Identifier(ParameterList) { StatementList }
+
+StatementList ::= Statement StatementList | null
+Statement ::= Declaration | Initialization | Assignment | return Expression
+
+Declaration ::= VariableType Identifier; | VariableType Identifier = Expression;
+Assignment ::= Identifier = Expression;
+
+Expression ::= AdditiveExpression
+AdditiveExpression ::= MultiplicativeExpression +|- Expression
+MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
+ExponentialExpression ::= Primary ^ Primary
+
+Primary ::= Identifier | FunctionCall | (Expression) | Constant | UnaryOperator Primary
+FunctionCall ::= Identifier(ArgumentList)
+
+ParameterList ::= Parameter, ParameterList | null
+Parameter ::= VariableType Identifier
+
+ArgumentList ::= Argument, ArgumentList | null
+Argument ::= Primary
+
+Constant ::= IntegerConstant | NumberConstant | ByteConstant | CharacterConstant | StringConstant
+IntegerConstant ::= [0-9]+
+NumberConstant ::= [0-9]+(.[0-9]*)?
+ByteConstant ::= [a-fA-F0-9]
+CharacterConstant ::= '[a-zA-Z0-9]'
+StringConstant ::= "[a-zA-Z0-9]*"
+
+VariableType ::= int | num | byte | char | string | obj | ClassType
+
+ClassDeclaration ::= class ClassType { ClassMemberList }
+ClassType ::= Identifier
+ClassMemberList ::= ClassMember ClassMemberList | null
+ClassMember ::= Declaration | Function
