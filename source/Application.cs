@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using FTG.Studios.Robol.Compiler;
 using FTG.Studios.Robol.VirtualMachine;
+using Internal;
 
 class Application
 {
@@ -10,7 +11,13 @@ class Application
 	{
 		Console.WriteLine("Weclome to the Robol compiler!");
 
-		string file_name = "programs/sqrt.rbl";
+		if (args.Length < 1)
+		{
+			Console.WriteLine("Usage: robol <file_to_compile>");
+			return;
+		}
+
+		string file_name = args[0];
 
 		Console.WriteLine($"File: {file_name}\n");
 

@@ -7,6 +7,8 @@ SOURCES := $(call rwildcard,$(SRC_DIR)/,*.cs)
 
 CSC_FLAGS = -errorendlocation
 
+FILE ?= programs/example.rbl
+
 .PHONY: all
 all: $(TARGET)
 
@@ -16,7 +18,7 @@ $(TARGET): $(SOURCES)
 
 .PHONY: run
 run: $(TARGET)
-	@mono $(TARGET)
+	@mono $(TARGET) $(FILE)
 
 clean:
 	@rm -rf $(BUILD_DIR)
