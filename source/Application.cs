@@ -10,9 +10,9 @@ class Application
 	{
 		Console.WriteLine("Weclome to the Robol compiler!");
 
-		string file_name = "programs/example.rbl";
+		string file_name = "programs/sqrt.rbl";
 
-		Console.WriteLine($"File: {file_name}");
+		Console.WriteLine($"File: {file_name}\n");
 
 		string source = File.ReadAllText(file_name);
 

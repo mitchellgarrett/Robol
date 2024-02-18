@@ -23,7 +23,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 					new ParseTree.BuiltinFunction(
 						new ParseTree.Identifier(identifier),
 						Syntax.GetType(Syntax.Keyword.Number),
-						new ParseTree.ParameterList((Syntax.GetType(Syntax.Keyword.Number), "num"))
+						new ParseTree.ParameterList((Syntax.GetType(Syntax.Keyword.Number), "value"))
 						)
 					);
 			}
@@ -37,7 +37,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		// Built-in functions
 		static Dictionary<string, Func<float, float>> builtin_functions = new Dictionary<string, Func<float, float>>() {
-			{ "math.sqrt", (n) => { return (float)Math.Sqrt(n); } }
+			{ "math.sqrt", (value) => { return (float)Math.Sqrt(value); } }
 		};
 	}
 }

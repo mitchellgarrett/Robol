@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Internal;
 
 namespace FTG.Studios.Robol.Compiler
 {
@@ -17,6 +16,7 @@ namespace FTG.Studios.Robol.Compiler
 			// Find main function
 			ParseTree.FunctionList list = functions;
 			ParseTree.Function main = list.Function;
+
 			while (list.List != null)
 			{
 				if (main.Identifier.Value.Equals("main")) break;

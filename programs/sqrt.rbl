@@ -1,0 +1,4 @@
+num main() {
+	num val = math.sqrt(64.0);
+	return val;
+}
