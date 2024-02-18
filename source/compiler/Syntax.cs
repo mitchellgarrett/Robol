@@ -40,7 +40,7 @@ namespace FTG.Studios.Robol.Compiler
 		public const string comparator_less_equal = "<=";
 		public const string comparator_greater_equal = ">=";
 
-		public const string identifier = @"^([_a-zA-Z][_a-zA-Z0-9]*)([\._a-zA-Z][_a-zA-Z0-9]*)*$";
+		public const string identifier = @"^([_a-zA-Z][_a-zA-Z0-9]*)([\._a-zA-Z][_a-zA-Z0-9]*)*$"; // TODO: remove '.' once libraries are supported
 		public const string integer_literal = @"^\d+$";
 		public const string number_literal = @"^((\d+(\.\d*)?)|(\.\d+))$";
 		public const string string_literal = @"^""[a-zA-Z0-9]+""$";

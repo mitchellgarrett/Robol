@@ -1,4 +1,8 @@
 num main() {
-	num val = math.sqrt(64.0);
+	num val = call_the_function(64);
 	return val;
+}
+
+num call_the_function(num value) {
+	return math.sqrt(value);
 }

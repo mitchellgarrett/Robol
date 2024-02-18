@@ -1,5 +1,6 @@
 ﻿using System;
 using FTG.Studios.Robol.Compiler;
+using Internal;
 
 namespace FTG.Studios.Robol.VirtualMachine
 {
@@ -43,7 +44,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		object EvaluateFunction(ParseTree.Function function)
 		{
-			if (function is ParseTree.BuiltinFunction) return Library.EvaluateBuiltinFunction(function as ParseTree.BuiltinFunction);
+			if (function is ParseTree.BuiltinFunction) return Library.EvaluateBuiltinFunction(function as ParseTree.BuiltinFunction, symbols);
 			return EvaluateStatementList(function.Body);
 		}
 		#endregion

@@ -76,13 +76,18 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Identifier + ":\n" + Body.ToString();
+				return $"{ReturnType} {Identifier} ({Parameters}):\n{Body}";
 			}
 		}
 
 		public class BuiltinFunction : Function
 		{
 			public BuiltinFunction(Identifier identifier, Type returnType, ParameterList parameters) : base(identifier, returnType, parameters, null) { }
+
+			public override string ToString()
+			{
+				return $"{ReturnType} {Identifier} ({Parameters}): <builtin>";
+			}
 		}
 
 		public class ParameterList : ASTNode
@@ -115,7 +120,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Parameter.ToString() + "\n" + List?.ToString();
+				return Parameter.ToString() + ", " + List?.ToString();
 			}
 		}
 
@@ -151,7 +156,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Argument.ToString() + "\n" + List?.ToString();
+				return Argument.ToString() + ", " + List?.ToString();
 			}
 		}
 
@@ -363,7 +368,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Identifier.ToString() + "()";
+				return $"{Identifier}({Arguments})";
 			}
 		}
 
