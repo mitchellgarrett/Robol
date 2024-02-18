@@ -1,0 +1,8 @@
+int main() {
+	int val = this_is_a_function();
+	return val;
+}
+
+int this_is_a_function() {
+	return 5;
+}
