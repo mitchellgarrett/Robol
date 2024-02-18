@@ -7,19 +7,24 @@ namespace FTG.Studios.Robol.VirtualMachine
 	public class SymbolTable
 	{
 
-		readonly SymbolTable parent;
+		public readonly SymbolTable Parent;
 		readonly Dictionary<string, Symbol> symbols;
 
 		public SymbolTable()
 		{
-			parent = null;
+			Parent = null;
 			symbols = new Dictionary<string, Symbol>();
 		}
 
-		private SymbolTable(SymbolTable parent)
+		public SymbolTable(SymbolTable parent)
 		{
-			this.parent = parent;
+			this.Parent = parent;
 			symbols = new Dictionary<string, Symbol>();
+		}
+
+		public void Clear()
+		{
+			symbols.Clear();
 		}
 
 		public bool InsertSymbol(string identifier, Type type)
@@ -39,7 +44,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 		public Symbol GetSymbol(string identifier)
 		{
 			if (symbols.TryGetValue(identifier, out Symbol symbol)) return symbol;
-			//if (parent != null) return parent.GetSymbol(identifier);
+			if (Parent != null) return Parent.GetSymbol(identifier);
 			return null;
 		}
 

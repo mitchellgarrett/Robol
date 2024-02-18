@@ -1,3 +1,5 @@
+using System;
+
 namespace FTG.Studios.Robol.VirtualMachine
 {
 

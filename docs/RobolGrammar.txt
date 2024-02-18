@@ -3,7 +3,7 @@ FunctionList ::= Function FunctionList | null
 Function ::= ReturnType Identifier(ParameterList) { StatementList }
 
 StatementList ::= Statement StatementList | null
-Statement ::= Declaration | Initialization | Assignment | return Expression
+Statement ::= Declaration | Initialization | Assignment | FunctionCall | return Expression
 
 Declaration ::= VariableType Identifier; | VariableType Identifier = Expression;
 Assignment ::= Identifier = Expression;

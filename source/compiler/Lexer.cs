@@ -7,11 +7,14 @@ namespace FTG.Studios.Robol.Compiler
 	public static class Lexer
 	{
 
+		static int line, column, prevColumn;
+
 		public static List<Token> Tokenize(string source)
 		{
 			List<Token> tokens = new List<Token>();
 
 			Token token;
+			line = column = prevColumn = 1;
 			string current_word = string.Empty;
 			for (int i = 0; i < source.Length; ++i)
 			{
@@ -19,10 +22,22 @@ namespace FTG.Studios.Robol.Compiler
 				char c = source[i];
 				if (char.IsWhiteSpace(c))
 				{
+					if (c == '\n')
+					{
+						column = 0;
+						line++;
+					}
+					else
+					{
+						column++;
+					}
+
 					if (!string.IsNullOrEmpty(current_word))
 					{
+
 						tokens.Add(BuildToken(current_word));
 						current_word = string.Empty;
+						prevColumn = column;
 					}
 					continue;
 				}
@@ -37,10 +52,13 @@ namespace FTG.Studios.Robol.Compiler
 					}
 					tokens.Add(token);
 					current_word = string.Empty;
+					prevColumn = column;
 					continue;
 				}
 
 				current_word += c;
+
+				column++;
 			}
 
 			if (!string.IsNullOrEmpty(current_word))
@@ -57,30 +75,30 @@ namespace FTG.Studios.Robol.Compiler
 			{
 
 				// Puncuation
-				case Syntax.semicolon: return new Token(TokenType.Semicolon, lexeme);
-				case Syntax.open_brace: return new Token(TokenType.OpenBrace, lexeme);
-				case Syntax.close_brace: return new Token(TokenType.CloseBrace, lexeme);
-				case Syntax.open_parenthesis: return new Token(TokenType.OpenParenthesis, lexeme);
-				case Syntax.close_parenthesis: return new Token(TokenType.CloseParenthesis, lexeme);
-				case Syntax.comma: return new Token(TokenType.Seperator, lexeme);
+				case Syntax.semicolon: return new Token(TokenType.Semicolon, lexeme, line, prevColumn);
+				case Syntax.open_brace: return new Token(TokenType.OpenBrace, lexeme, line, prevColumn);
+				case Syntax.close_brace: return new Token(TokenType.CloseBrace, lexeme, line, prevColumn);
+				case Syntax.open_parenthesis: return new Token(TokenType.OpenParenthesis, lexeme, line, prevColumn);
+				case Syntax.close_parenthesis: return new Token(TokenType.CloseParenthesis, lexeme, line, prevColumn);
+				case Syntax.comma: return new Token(TokenType.Seperator, lexeme, line, prevColumn);
 
 				// Unary Operators
-				case Syntax.operator_negation: return new Token(TokenType.UnaryOperator, lexeme);
-				case Syntax.operator_complement: return new Token(TokenType.UnaryOperator, lexeme);
+				case Syntax.operator_negation: return new Token(TokenType.UnaryOperator, lexeme, line, prevColumn);
+				case Syntax.operator_complement: return new Token(TokenType.UnaryOperator, lexeme, line, prevColumn);
 
 				// Binary Operators
-				case Syntax.operator_assignment: return new Token(TokenType.Assignment, lexeme);
-				case Syntax.operator_addition: return new Token(TokenType.AdditiveOperator, lexeme);
-				case Syntax.operator_subtraction: return new Token(TokenType.AdditiveOperator, lexeme);
+				case Syntax.operator_assignment: return new Token(TokenType.Assignment, lexeme, line, prevColumn);
+				case Syntax.operator_addition: return new Token(TokenType.AdditiveOperator, lexeme, line, prevColumn);
+				case Syntax.operator_subtraction: return new Token(TokenType.AdditiveOperator, lexeme, line, prevColumn);
 
-				case Syntax.operator_multiplication: return new Token(TokenType.MultiplicativeOperator, lexeme);
-				case Syntax.operator_division: return new Token(TokenType.MultiplicativeOperator, lexeme);
-				case Syntax.operator_modulus: return new Token(TokenType.MultiplicativeOperator, lexeme);
+				case Syntax.operator_multiplication: return new Token(TokenType.MultiplicativeOperator, lexeme, line, prevColumn);
+				case Syntax.operator_division: return new Token(TokenType.MultiplicativeOperator, lexeme, line, prevColumn);
+				case Syntax.operator_modulus: return new Token(TokenType.MultiplicativeOperator, lexeme, line, prevColumn);
 
-				case Syntax.operator_exponent: return new Token(TokenType.ExponentialOperator, lexeme);
+				case Syntax.operator_exponent: return new Token(TokenType.ExponentialOperator, lexeme, line, prevColumn);
 			}
 
-			return Token.Invalid;
+			return Token.Invalid(line, prevColumn);
 		}
 
 		static Token BuildToken(string lexeme)
@@ -88,57 +106,30 @@ namespace FTG.Studios.Robol.Compiler
 			Syntax.Keyword keyword;
 			if ((keyword = Syntax.GetKeywordType(lexeme)) != Syntax.Keyword.Invalid)
 			{
-				return new Token(TokenType.Keyword, keyword);
+				return new Token(TokenType.Keyword, keyword, line, prevColumn);
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.integer_literal))
 			{
-				return new Token(TokenType.IntegerConstant, int.Parse(lexeme));
+				return new Token(TokenType.IntegerConstant, int.Parse(lexeme), line, prevColumn);
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.number_literal))
 			{
-				return new Token(TokenType.NumberConstant, float.Parse(lexeme));
+				return new Token(TokenType.NumberConstant, float.Parse(lexeme), line, prevColumn);
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.string_literal))
 			{
-				return new Token(TokenType.StringConstant, lexeme);
+				return new Token(TokenType.StringConstant, lexeme, line, prevColumn);
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.identifier))
 			{
-				return new Token(TokenType.Identifier, lexeme);
+				return new Token(TokenType.Identifier, lexeme, line, prevColumn);
 			}
 
-			return Token.Invalid;
-		}
-	}
-
-	public struct Token
-	{
-		public TokenType Type;
-		public object Value;
-
-		public Token(TokenType type, object value)
-		{
-			this.Type = type;
-			this.Value = value;
-		}
-
-		public bool IsValid()
-		{
-			return Type != TokenType.Invalid;
-		}
-
-		public static Token Invalid
-		{
-			get { return new Token(TokenType.Invalid, null); }
-		}
-
-		public override string ToString()
-		{
-			return $"<{Type.ToString()}, {(Value != null ? Value.ToString() : "null")}>";
+			return Token.Invalid(line, prevColumn);
 		}
 	}
 }

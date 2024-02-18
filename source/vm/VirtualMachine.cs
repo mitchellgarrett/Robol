@@ -12,12 +12,12 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		readonly ParseTree program;
 		readonly SymbolTable globalScope;
+		SymbolTable localScope;
 
-		public VirtualMachine(ParseTree ast)
+		public VirtualMachine(ParseTree program)
 		{
-			this.program = ast;
+			this.program = program;
 			globalScope = new SymbolTable();
-			Library.AddBuiltinFunctionsToSymbolTable(globalScope);
 		}
 
 		Action<object, MessageSeverity> ConsoleOutput;
@@ -26,6 +26,9 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		public void Run()
 		{
+			globalScope.Clear();
+			Library.AddBuiltinFunctionsToSymbolTable(globalScope);
+
 			// Define functions
 			ParseTree.FunctionList list = program.Root.List;
 			while (list != null)
@@ -39,13 +42,18 @@ namespace FTG.Studios.Robol.VirtualMachine
 		#region Program
 		void EvaluateProgram(ParseTree.Program program)
 		{
+			localScope = new SymbolTable(globalScope);
 			ConsoleOutput?.Invoke(EvaluateFunction(program.Main), MessageSeverity.Normal);
+			localScope = null;
 		}
 
 		object EvaluateFunction(ParseTree.Function function)
 		{
-			if (function is ParseTree.BuiltinFunction) return Library.EvaluateBuiltinFunction(function as ParseTree.BuiltinFunction, globalScope);
-			return EvaluateStatementList(function.Body);
+			localScope = new SymbolTable(localScope);
+			if (function is ParseTree.BuiltinFunction) return Library.EvaluateBuiltinFunction(function as ParseTree.BuiltinFunction, localScope);
+			object result = EvaluateStatementList(function.Body);
+			localScope = localScope.Parent;
+			return result;
 		}
 		#endregion
 
@@ -73,15 +81,15 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		object EvaluateStatement(ParseTree.Declaration statement)
 		{
-			if (!globalScope.IsDeclared(statement.Identifier.Value)) globalScope.InsertSymbol(statement.Identifier.Value, statement.Type);
-			Symbol symbol = globalScope.GetSymbol(statement.Identifier.Value);
+			if (!localScope.IsDeclared(statement.Identifier.Value)) localScope.InsertSymbol(statement.Identifier.Value, statement.Type);
+			Symbol symbol = localScope.GetSymbol(statement.Identifier.Value);
 			symbol.SetValue(EvaluateExpression(statement.Expression));
 			return null;
 		}
 
 		object EvaluateStatement(ParseTree.Assignment statement)
 		{
-			Symbol symbol = globalScope.GetSymbol(statement.Identifier.Value);
+			Symbol symbol = localScope.GetSymbol(statement.Identifier.Value);
 			symbol.SetValue(EvaluateExpression(statement.Expression));
 			return null;
 		}
@@ -169,7 +177,9 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		object EvaluatePrimary(ParseTree.Identifier primary)
 		{
-			return globalScope.GetSymbol(primary.Value).Value;
+			Console.WriteLine("locals: " + localScope);
+			Console.WriteLine(primary);
+			return localScope.GetSymbol(primary.Value).Value;
 		}
 
 		object EvaluatePrimary(ParseTree.FunctionCall primary)
@@ -200,8 +210,9 @@ namespace FTG.Studios.Robol.VirtualMachine
 		object EvaluateFunctionCall(ParseTree.FunctionCall call)
 		{
 			//symbols.PushScope();
+			localScope = new SymbolTable(localScope);
 
-			ParseTree.Function function = globalScope.GetSymbol(call.Identifier.Value).Value as ParseTree.Function;
+			ParseTree.Function function = localScope.GetSymbol(call.Identifier.Value).Value as ParseTree.Function;
 
 			ParseTree.ParameterList plist = function.Parameters;
 			ParseTree.ArgumentList alist = call.Arguments;
@@ -210,7 +221,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 				ParseTree.Parameter param = plist.Parameter;
 				ParseTree.Argument arg = alist.Argument;
 
-				globalScope.InsertSymbol(param.Identifier.Value, param.Type, EvaluatePrimary(arg.Primary));
+				localScope.InsertSymbol(param.Identifier.Value, param.Type, EvaluatePrimary(arg.Primary));
 
 				plist = plist.List;
 				alist = alist.List;
@@ -218,6 +229,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 			object value = EvaluateFunction(function);
 
+			localScope = localScope.Parent;
 			//symbols.PopScope();
 			return value;
 		}

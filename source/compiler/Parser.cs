@@ -127,11 +127,12 @@ namespace FTG.Studios.Robol.Compiler
 			return new ParseTree.StatementList(statement, list);
 		}
 
-		// Statement ::= Declaration | Assignment | return Expression
+		// Statement ::= Declaration | Assignment | FunctionCall | return Expression
 		public static ParseTree.Statement ParseStatement(Queue<Token> tokens)
 		{
 			if (Match(tokens.Peek(), TokenType.Keyword) && Syntax.IsVariableType((Syntax.Keyword)tokens.Peek().Value)) return ParseDeclaration(tokens);
 			if (Match(tokens.Peek(), TokenType.Identifier)) return ParseAssignment(tokens);
+			// TODO: add parse functioncall
 			if (Match(tokens.Peek(), TokenType.Keyword, Syntax.Keyword.Return)) return ParseReturn(tokens);
 			return null;
 		}
