@@ -6,12 +6,14 @@ namespace FTG.Studios.Robol.Compiler
 	public static class Compiler
 	{
 
-		public static VirtualMachine Compile(string source)
+		public static ParseTree Compile(string source)
 		{
 			List<Token> tokens = Lexer.Tokenize(source);
-			ParseTree ast = Parser.Parse(tokens);
-
-			return new VirtualMachine(ast);
+			foreach (var t in tokens)
+			{
+				System.Console.WriteLine(t);
+			}
+			return Parser.Parse(tokens);
 		}
 
 	}

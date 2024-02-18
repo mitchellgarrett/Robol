@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FTG.Studios.Robol.Compiler
+namespace FTG.Studios.Robol.VirtualMachine
 {
 
 	public class SymbolTable

@@ -57,27 +57,27 @@ namespace FTG.Studios.Robol.Compiler
 			{
 
 				// Puncuation
-				case Syntax.semicolon: return new Token(TokenType.Semicolon);
-				case Syntax.open_brace: return new Token(TokenType.OpenBrace);
-				case Syntax.close_brace: return new Token(TokenType.CloseBrace);
-				case Syntax.open_parenthesis: return new Token(TokenType.OpenParenthesis);
-				case Syntax.close_parenthesis: return new Token(TokenType.CloseParenthesis);
-				case Syntax.comma: return new Token(TokenType.Seperator);
+				case Syntax.semicolon: return new Token(TokenType.Semicolon, lexeme);
+				case Syntax.open_brace: return new Token(TokenType.OpenBrace, lexeme);
+				case Syntax.close_brace: return new Token(TokenType.CloseBrace, lexeme);
+				case Syntax.open_parenthesis: return new Token(TokenType.OpenParenthesis, lexeme);
+				case Syntax.close_parenthesis: return new Token(TokenType.CloseParenthesis, lexeme);
+				case Syntax.comma: return new Token(TokenType.Seperator, lexeme);
 
 				// Unary Operators
-				case Syntax.operator_negation: return new Token(TokenType.UnaryOperator, Syntax.operator_negation);
-				case Syntax.operator_complement: return new Token(TokenType.UnaryOperator, Syntax.operator_complement);
+				case Syntax.operator_negation: return new Token(TokenType.UnaryOperator, lexeme);
+				case Syntax.operator_complement: return new Token(TokenType.UnaryOperator, lexeme);
 
 				// Binary Operators
-				case Syntax.operator_assignment: return new Token(TokenType.Assignment);
-				case Syntax.operator_addition: return new Token(TokenType.AdditiveOperator, Syntax.operator_addition);
-				case Syntax.operator_subtraction: return new Token(TokenType.AdditiveOperator, Syntax.operator_subtraction);
+				case Syntax.operator_assignment: return new Token(TokenType.Assignment, lexeme);
+				case Syntax.operator_addition: return new Token(TokenType.AdditiveOperator, lexeme);
+				case Syntax.operator_subtraction: return new Token(TokenType.AdditiveOperator, lexeme);
 
-				case Syntax.operator_multiplication: return new Token(TokenType.MultiplicativeOperator, Syntax.operator_multiplication);
-				case Syntax.operator_division: return new Token(TokenType.MultiplicativeOperator, Syntax.operator_division);
-				case Syntax.operator_modulus: return new Token(TokenType.MultiplicativeOperator, Syntax.operator_modulus);
+				case Syntax.operator_multiplication: return new Token(TokenType.MultiplicativeOperator, lexeme);
+				case Syntax.operator_division: return new Token(TokenType.MultiplicativeOperator, lexeme);
+				case Syntax.operator_modulus: return new Token(TokenType.MultiplicativeOperator, lexeme);
 
-				case Syntax.operator_exponent: return new Token(TokenType.ExponentialOperator, Syntax.operator_exponent);
+				case Syntax.operator_exponent: return new Token(TokenType.ExponentialOperator, lexeme);
 			}
 
 			return Token.Invalid;
@@ -89,6 +89,11 @@ namespace FTG.Studios.Robol.Compiler
 			if ((keyword = Syntax.GetKeywordType(lexeme)) != Syntax.Keyword.Invalid)
 			{
 				return new Token(TokenType.Keyword, keyword);
+			}
+
+			if (Regex.IsMatch(lexeme, Syntax.integer_literal))
+			{
+				return new Token(TokenType.IntegerConstant, int.Parse(lexeme));
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.number_literal))
@@ -115,12 +120,6 @@ namespace FTG.Studios.Robol.Compiler
 		public TokenType Type;
 		public object Value;
 
-		public Token(TokenType type)
-		{
-			this.Type = type;
-			Value = null;
-		}
-
 		public Token(TokenType type, object value)
 		{
 			this.Type = type;
@@ -139,7 +138,7 @@ namespace FTG.Studios.Robol.Compiler
 
 		public override string ToString()
 		{
-			return $"<{Type.ToString()}, {Value.ToString()}>";
+			return $"<{Type.ToString()}, {(Value != null ? Value.ToString() : "null")}>";
 		}
 	}
 }

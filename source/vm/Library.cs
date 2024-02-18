@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using FTG.Studios.Robol.Compiler;
 
-namespace FTG.Studios.Robol.Compiler
+namespace FTG.Studios.Robol.VirtualMachine
 {
 
 	public static class Library

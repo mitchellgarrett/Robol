@@ -1,6 +1,7 @@
 ﻿using System;
+using FTG.Studios.Robol.Compiler;
 
-namespace FTG.Studios.Robol.Compiler
+namespace FTG.Studios.Robol.VirtualMachine
 {
 
 	public enum MessageSeverity { Normal, Warning, Error };
@@ -34,8 +35,7 @@ namespace FTG.Studios.Robol.Compiler
 			EvaluateProgram(ast.Root);
 		}
 
-		/*** PROGRAM ***/
-
+		#region Program
 		void EvaluateProgram(ParseTree.Program program)
 		{
 			ConsoleOutput?.Invoke(EvaluateFunction(program.Main), MessageSeverity.Normal);
@@ -46,9 +46,9 @@ namespace FTG.Studios.Robol.Compiler
 			if (function is ParseTree.BuiltinFunction) return Library.EvaluateBuiltinFunction(function as ParseTree.BuiltinFunction);
 			return EvaluateStatementList(function.Body);
 		}
+		#endregion
 
-		/*** STATEMENTS ***/
-
+		#region Statements
 		object EvaluateStatementList(ParseTree.StatementList list)
 		{
 			if (list == null) return null;
@@ -84,9 +84,9 @@ namespace FTG.Studios.Robol.Compiler
 			symbol.SetValue(EvaluateExpression(statement.Expression));
 			return null;
 		}
+		#endregion
 
-		/*** EXPRESSIONS ***/
-
+		#region Expressions
 		object EvaluateExpression(ParseTree.Expression expression)
 		{
 			if (expression is ParseTree.UnaryExpression) return EvaluateExpression(expression as ParseTree.UnaryExpression);
@@ -99,16 +99,18 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			switch (expression.Operator)
 			{
-				case Syntax.operator_subtraction: return -EvaluatePrimary(expression.Primary as ParseTree.NumberConstant);
+				case Syntax.operator_subtraction:
+					return expression.Primary.GetType() == typeof(ParseTree.IntegerConstant)
+						? -EvaluatePrimary(expression.Primary as ParseTree.IntegerConstant)
+						: -EvaluatePrimary(expression.Primary as ParseTree.NumberConstant);
 			}
 			return 0;
 		}
 
 		float EvaluateExpression(ParseTree.AdditiveExpression expression)
 		{
-			float lhs = EvaluateExpression(expression.LeftExpression);
+			float lhs = (float)EvaluateExpression(expression.LeftExpression);
 			if (expression.Operator == '\0') return lhs;
-
 			float rhs = (float)EvaluateExpression(expression.RightExpression);
 
 			switch (expression.Operator)
@@ -122,9 +124,7 @@ namespace FTG.Studios.Robol.Compiler
 		float EvaluateExpression(ParseTree.MultiplicativeExpression expression)
 		{
 			float lhs = (float)EvaluateExpression(expression.LeftExpression);
-
 			if (expression.Operator == '\0') return lhs;
-
 			float rhs = (float)EvaluateExpression(expression.RightExpression);
 
 			switch (expression.Operator)
@@ -138,20 +138,28 @@ namespace FTG.Studios.Robol.Compiler
 
 		float EvaluateExpression(ParseTree.ExponentialExpression expression)
 		{
-			float lhs = (float)EvaluatePrimary(expression.LeftExpression);
+			float lhs =
+				expression.LeftExpression.GetType() == typeof(ParseTree.IntegerConstant)
+				? (float)(int)EvaluatePrimary(expression.LeftExpression)
+				: (float)EvaluatePrimary(expression.LeftExpression);
 
 			if (expression.Operator == '\0') return lhs;
 
-			float rhs = (float)EvaluatePrimary(expression.RightExpression);
+			float rhs =
+				expression.RightExpression.GetType() == typeof(ParseTree.IntegerConstant)
+				? (float)(int)EvaluatePrimary(expression.RightExpression)
+				: (float)EvaluatePrimary(expression.RightExpression);
+
 			return (float)Math.Pow(lhs, rhs);
 		}
+		#endregion
 
-		/*** PRIMARIES ***/
-
+		#region Primaries
 		object EvaluatePrimary(ParseTree.Primary primary)
 		{
 			if (primary is ParseTree.Identifier) return EvaluatePrimary(primary as ParseTree.Identifier);
 			if (primary is ParseTree.FunctionCall) return EvaluatePrimary(primary as ParseTree.FunctionCall);
+			if (primary is ParseTree.IntegerConstant) return EvaluatePrimary(primary as ParseTree.IntegerConstant);
 			if (primary is ParseTree.NumberConstant) return EvaluatePrimary(primary as ParseTree.NumberConstant);
 			if (primary is ParseTree.StringConstant) return EvaluatePrimary(primary as ParseTree.StringConstant);
 			if (primary is ParseTree.Expression) return EvaluateExpression(primary as ParseTree.Expression);
@@ -166,6 +174,11 @@ namespace FTG.Studios.Robol.Compiler
 		object EvaluatePrimary(ParseTree.FunctionCall primary)
 		{
 			return EvaluateFunctionCall(primary);
+		}
+
+		int EvaluatePrimary(ParseTree.IntegerConstant primary)
+		{
+			return primary.Value;
 		}
 
 		float EvaluatePrimary(ParseTree.NumberConstant primary)
@@ -207,5 +220,6 @@ namespace FTG.Studios.Robol.Compiler
 			//symbols.PopScope();
 			return value;
 		}
+		#endregion
 	}
 }

@@ -39,7 +39,7 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		/*** FUNCTIONS ***/
+		#region Functions
 		public class FunctionList : ASTNode
 		{
 
@@ -170,8 +170,9 @@ namespace FTG.Studios.Robol.Compiler
 				return $"{Primary}";
 			}
 		}
+		#endregion
 
-		/*** STATEMENTS ***/
+		#region Statements
 		public interface Statement : ASTNode { }
 
 		public class StatementList : ASTNode
@@ -242,11 +243,12 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return "return<" + Expression.ToString() + ">";
+				return "return <" + Expression.ToString() + ">";
 			}
 		}
+		#endregion
 
-		/*** EXPRESSIONS ***/
+		#region Expressions
 		public interface Expression : ASTNode, Primary { }
 
 		public class UnaryExpression : Expression
@@ -326,8 +328,9 @@ namespace FTG.Studios.Robol.Compiler
 				return LeftExpression?.ToString() + (Operator != '\0' ? Operator.ToString() : null) + RightExpression?.ToString();
 			}
 		}
+		#endregion
 
-		/*** PRIMARIES ***/
+		#region Primaries
 		public interface Primary : ASTNode { }
 
 		public class Identifier : Primary
@@ -361,6 +364,22 @@ namespace FTG.Studios.Robol.Compiler
 			public override string ToString()
 			{
 				return Identifier.ToString() + "()";
+			}
+		}
+
+		public class IntegerConstant : Primary
+		{
+
+			public int Value;
+
+			public IntegerConstant(int value)
+			{
+				this.Value = value;
+			}
+
+			public override string ToString()
+			{
+				return Value.ToString();
 			}
 		}
 
@@ -411,5 +430,6 @@ namespace FTG.Studios.Robol.Compiler
 				return Value.ToString();
 			}
 		}
+		#endregion
 	}
 }
