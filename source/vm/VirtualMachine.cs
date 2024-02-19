@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using FTG.Studios.Robol.Compiler;
-using Internal;
 
 namespace FTG.Studios.Robol.VirtualMachine
 {
@@ -36,24 +37,29 @@ namespace FTG.Studios.Robol.VirtualMachine
 				if (!globalScope.IsDeclared(list.Function.Identifier.Value)) globalScope.InsertSymbol(list.Function.Identifier.Value, typeof(void), list.Function);
 				list = list.List;
 			}
-			EvaluateProgram(program.Root);
+
+			try
+			{
+				EvaluateProgram(program.Root);
+			}
+			catch (Exception exception)
+			{
+				Console.Error.WriteLine($"{exception.GetType()}: {exception.Message}");
+			}
 		}
 
 		#region Program
 		void EvaluateProgram(ParseTree.Program program)
 		{
-			localScope = new SymbolTable(globalScope);
+			localScope = globalScope.PushScope();
 			ConsoleOutput?.Invoke(EvaluateFunction(program.Main), MessageSeverity.Normal);
-			localScope = null;
+			localScope = localScope.PopScope();
 		}
 
 		object EvaluateFunction(ParseTree.Function function)
 		{
-			localScope = new SymbolTable(localScope);
 			if (function is ParseTree.BuiltinFunction) return Library.EvaluateBuiltinFunction(function as ParseTree.BuiltinFunction, localScope);
-			object result = EvaluateStatementList(function.Body);
-			localScope = localScope.Parent;
-			return result;
+			return EvaluateStatementList(function.Body);
 		}
 		#endregion
 
@@ -90,6 +96,9 @@ namespace FTG.Studios.Robol.VirtualMachine
 		object EvaluateStatement(ParseTree.Assignment statement)
 		{
 			Symbol symbol = localScope.GetSymbol(statement.Identifier.Value);
+
+			if (symbol == null) throw new ArgumentNullException(statement.Identifier.Value, $"Variable does not exist!");
+
 			symbol.SetValue(EvaluateExpression(statement.Expression));
 			return null;
 		}
@@ -177,9 +186,11 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		object EvaluatePrimary(ParseTree.Identifier primary)
 		{
-			Console.WriteLine("locals: " + localScope);
-			Console.WriteLine(primary);
-			return localScope.GetSymbol(primary.Value).Value;
+			Symbol symbol = localScope.GetSymbol(primary.Value);
+
+			if (symbol == null) throw new ArgumentNullException($"Variable '{primary.Value}' does not exist!");
+
+			return symbol.Value;
 		}
 
 		object EvaluatePrimary(ParseTree.FunctionCall primary)
@@ -209,29 +220,32 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		object EvaluateFunctionCall(ParseTree.FunctionCall call)
 		{
-			//symbols.PushScope();
-			localScope = new SymbolTable(localScope);
-
 			ParseTree.Function function = localScope.GetSymbol(call.Identifier.Value).Value as ParseTree.Function;
 
 			ParseTree.ParameterList plist = function.Parameters;
 			ParseTree.ArgumentList alist = call.Arguments;
+			List<(string, Type, object)> parameters = new List<(string, Type, object)>();
 			while (plist != null && alist != null)
 			{
 				ParseTree.Parameter param = plist.Parameter;
 				ParseTree.Argument arg = alist.Argument;
 
-				localScope.InsertSymbol(param.Identifier.Value, param.Type, EvaluatePrimary(arg.Primary));
+				parameters.Add((param.Identifier.Value, param.Type, EvaluatePrimary(arg.Primary)));
 
 				plist = plist.List;
 				alist = alist.List;
 			}
 
-			object value = EvaluateFunction(function);
+			localScope = localScope.PushAdjacentScope();
+			foreach ((string identifier, Type type, object value) in parameters)
+			{
+				localScope.InsertSymbol(identifier, type, value);
+			}
 
-			localScope = localScope.Parent;
-			//symbols.PopScope();
-			return value;
+			object result = EvaluateFunction(function);
+			localScope = localScope.PopAdjacentScope();
+
+			return result;
 		}
 		#endregion
 	}

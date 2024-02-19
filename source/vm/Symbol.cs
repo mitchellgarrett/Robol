@@ -33,7 +33,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		public override string ToString()
 		{
-			return $"{Type} : {Identifier}";
+			return $"{Type} : {Identifier} ({(Value != null ? Value : "null")})";
 		}
 	}
 }

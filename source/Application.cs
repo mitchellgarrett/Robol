@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using FTG.Studios.Robol.Compiler;
 using FTG.Studios.Robol.VirtualMachine;
-using Internal;
 
 class Application
 {
@@ -37,6 +36,7 @@ class Application
 		{
 			Console.WriteLine(o);
 		});
+
 		vm.Run();
 	}
 }
