@@ -24,19 +24,20 @@ namespace FTG.Studios.Robol.Compiler
 				{
 					if (c == '\n')
 					{
-						column = 0;
+						column = 1;
+						prevColumn = column;
 						line++;
 					}
 					else
 					{
 						column++;
+						prevColumn++;
 					}
 
 					if (!string.IsNullOrEmpty(current_word))
 					{
 						tokens.Add(BuildToken(current_word));
 						current_word = string.Empty;
-						prevColumn = column;
 					}
 					continue;
 				}
