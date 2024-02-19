@@ -173,16 +173,16 @@ namespace FTG.Studios.Robol.Compiler
 		public class Argument : ASTNode
 		{
 
-			public readonly Primary Primary;
+			public readonly Expression Expression;
 
-			public Argument(Primary primary, int line, int column) : base(line, column)
+			public Argument(Expression expression, int line, int column) : base(line, column)
 			{
-				this.Primary = primary;
+				this.Expression = expression;
 			}
 
 			public override string ToString()
 			{
-				return $"{Primary}";
+				return $"{Expression}";
 			}
 		}
 		#endregion

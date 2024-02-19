@@ -122,11 +122,11 @@ namespace FTG.Studios.Robol.Compiler
 			return new ParseTree.ArgumentList(argument, list, argument.Line, argument.Column);
 		}
 
-		// Argument::= Primary
+		// Argument::= Expression
 		static ParseTree.Argument ParseArgument(Queue<Token> tokens)
 		{
-			ParseTree.Primary primary = ParsePrimary(tokens);
-			return new ParseTree.Argument(primary, primary.Line, primary.Column);
+			ParseTree.Expression expression = ParseExpression(tokens);
+			return new ParseTree.Argument(expression, expression.Line, expression.Column);
 		}
 
 		// StatementList ::= Statement StatementList | null

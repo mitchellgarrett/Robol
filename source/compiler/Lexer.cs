@@ -24,9 +24,14 @@ namespace FTG.Studios.Robol.Compiler
 				{
 					if (c == '\n')
 					{
-						column = 1;
+						column = 0;
 						prevColumn = column;
 						line++;
+					}
+					else if (c == '\t')
+					{
+						column += 4;
+						prevColumn += 4;
 					}
 					else
 					{

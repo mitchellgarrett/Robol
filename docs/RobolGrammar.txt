@@ -20,7 +20,7 @@ ParameterList ::= Parameter, ParameterList | null
 Parameter ::= VariableType Identifier
 
 ArgumentList ::= Argument, ArgumentList | null
-Argument ::= Primary
+Argument ::= Expression
 
 Constant ::= IntegerConstant | NumberConstant | ByteConstant | CharacterConstant | StringConstant
 IntegerConstant ::= [0-9]+
@@ -31,7 +31,6 @@ StringConstant ::= "[a-zA-Z0-9]*"
 
 VariableType ::= int | num | byte | char | string | obj | ClassType
 
-ClassDeclaration ::= class ClassType { ClassMemberList }
-ClassType ::= Identifier
+ClassDeclaration ::= class Identifier { ClassMemberList }
 ClassMemberList ::= ClassMember ClassMemberList | null
 ClassMember ::= Declaration | Function

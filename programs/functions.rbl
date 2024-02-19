@@ -1,8 +1,13 @@
 int main() {
 	int val = this_is_a_function();
+	val = this_is_another_function(val + 1);
 	return val;
 }
 
 int this_is_a_function() {
 	return 5;
+}
+
+int this_is_another_function(int val) {
+	return val * 2;
 }

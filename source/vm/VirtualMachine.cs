@@ -230,7 +230,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 				ParseTree.Parameter param = plist.Parameter;
 				ParseTree.Argument arg = alist.Argument;
 
-				parameters.Add((param.Identifier.Value, param.Type, EvaluatePrimary(arg.Primary)));
+				parameters.Add((param.Identifier.Value, param.Type, EvaluateExpression(arg.Expression)));
 
 				plist = plist.List;
 				alist = alist.List;
