@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using FTG.Studios.Robol.Compiler;
 using FTG.Studios.Robol.VirtualMachine;
+using Internal;
 
 class Application
 {
@@ -24,11 +26,21 @@ class Application
 
 		Console.WriteLine("Source code:");
 		Console.WriteLine(source);
+		Console.WriteLine();
 
-		ParseTree output = Compiler.Compile(source);
+		List<Token> tokens = Lexer.Tokenize(source);
+		Console.WriteLine("Tokens:");
+		foreach (Token token in tokens)
+		{
+			Console.WriteLine(token);
+		}
+		Console.WriteLine();
 
-		Console.WriteLine("\nParse tree:");
+		ParseTree output = Compiler.Compile(tokens);
+
+		Console.WriteLine("Parse tree:");
 		Console.WriteLine(output);
+		Console.WriteLine();
 
 		VirtualMachine vm = new VirtualMachine(output);
 

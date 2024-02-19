@@ -9,12 +9,12 @@ namespace FTG.Studios.Robol.Compiler
 		public static ParseTree Compile(string source)
 		{
 			List<Token> tokens = Lexer.Tokenize(source);
-			foreach (var t in tokens)
-			{
-				System.Console.WriteLine(t);
-			}
 			return Parser.Parse(tokens);
 		}
 
+		public static ParseTree Compile(List<Token> tokens)
+		{
+			return Parser.Parse(tokens);
+		}
 	}
 }

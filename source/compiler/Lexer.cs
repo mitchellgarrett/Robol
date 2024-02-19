@@ -34,7 +34,6 @@ namespace FTG.Studios.Robol.Compiler
 
 					if (!string.IsNullOrEmpty(current_word))
 					{
-
 						tokens.Add(BuildToken(current_word));
 						current_word = string.Empty;
 						prevColumn = column;
@@ -57,7 +56,6 @@ namespace FTG.Studios.Robol.Compiler
 				}
 
 				current_word += c;
-
 				column++;
 			}
 
