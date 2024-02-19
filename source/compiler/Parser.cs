@@ -24,7 +24,7 @@ namespace FTG.Studios.Robol.Compiler
 				main = list.Function;
 			}
 
-			ParseTree.Program program = new ParseTree.Program(main, functions);
+			ParseTree.Program program = new ParseTree.Program(main, functions, 0, 0);
 			ParseTree ast = new ParseTree(program);
 
 			return ast;
@@ -35,17 +35,24 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			if (tokens.Count == 0) return null;
 
+			int line = tokens.Peek().Line;
+			int column = tokens.Peek().Column;
+
 			ParseTree.Function function = ParseFunction(tokens);
 			if (function == null) return null;
 
 			ParseTree.FunctionList list = ParseFunctionList(tokens);
-			return new ParseTree.FunctionList(function, list);
+			return new ParseTree.FunctionList(function, list, line, column);
 		}
 
 		// Function ::= ReturnType Identifier() { StatementList }
 		static ParseTree.Function ParseFunction(Queue<Token> tokens)
 		{
 			Token token = tokens.Peek();
+
+			int line = token.Line;
+			int column = token.Column;
+
 			if (!Match(token, TokenType.Keyword) || !Syntax.IsReturnType((Syntax.Keyword)token.Value)) return null;
 			tokens.Dequeue();
 
@@ -58,7 +65,7 @@ namespace FTG.Studios.Robol.Compiler
 			MatchFail(tokens.Dequeue(), TokenType.CloseParenthesis);
 			MatchFail(tokens.Dequeue(), TokenType.OpenBrace);
 
-			ParseTree.Function function = new ParseTree.Function(identifier, Syntax.GetType((Syntax.Keyword)token.Value), parameters, ParseStatementList(tokens));
+			ParseTree.Function function = new ParseTree.Function(identifier, Syntax.GetType((Syntax.Keyword)token.Value), parameters, ParseStatementList(tokens), line, column);
 
 			MatchFail(tokens.Dequeue(), TokenType.CloseBrace);
 
@@ -79,19 +86,23 @@ namespace FTG.Studios.Robol.Compiler
 				list = ParseParameterList(tokens);
 			}
 
-			return new ParseTree.ParameterList(parameter, list);
+			return new ParseTree.ParameterList(parameter, list, parameter.Line, parameter.Column);
 		}
 
 		// Parameter::= VariableType Identifier
 		static ParseTree.Parameter ParseParameter(Queue<Token> tokens)
 		{
 			Token token = tokens.Dequeue();
+
+			int line = token.Line;
+			int column = token.Column;
+
 			if (!Match(token, TokenType.Keyword) || !Syntax.IsVariableType((Syntax.Keyword)token.Value)) Fail(token);
 
 			System.Type type = Syntax.GetType((Syntax.Keyword)token.Value);
 			ParseTree.Identifier identifier = ParseIdentifier(tokens);
 
-			return new ParseTree.Parameter(type, identifier);
+			return new ParseTree.Parameter(type, identifier, line, column);
 		}
 
 		// ArgumentList::= Argument, ArgumentList | null
@@ -108,13 +119,14 @@ namespace FTG.Studios.Robol.Compiler
 				list = ParseArgumentList(tokens);
 			}
 
-			return new ParseTree.ArgumentList(argument, list);
+			return new ParseTree.ArgumentList(argument, list, argument.Line, argument.Column);
 		}
 
 		// Argument::= Primary
 		static ParseTree.Argument ParseArgument(Queue<Token> tokens)
 		{
-			return new ParseTree.Argument(ParsePrimary(tokens));
+			ParseTree.Primary primary = ParsePrimary(tokens);
+			return new ParseTree.Argument(primary, primary.Line, primary.Column);
 		}
 
 		// StatementList ::= Statement StatementList | null
@@ -124,7 +136,7 @@ namespace FTG.Studios.Robol.Compiler
 			if (statement == null) return null;
 
 			ParseTree.StatementList list = ParseStatementList(tokens);
-			return new ParseTree.StatementList(statement, list);
+			return new ParseTree.StatementList(statement, list, statement.Line, statement.Column);
 		}
 
 		// Statement ::= Declaration | Assignment | FunctionCall | return Expression
@@ -141,6 +153,10 @@ namespace FTG.Studios.Robol.Compiler
 		static ParseTree.Declaration ParseDeclaration(Queue<Token> tokens)
 		{
 			Token token = tokens.Dequeue();
+
+			int line = token.Line;
+			int column = token.Column;
+
 			if (!Match(token, TokenType.Keyword) || !Syntax.IsVariableType((Syntax.Keyword)token.Value)) Fail(token);
 
 			ParseTree.Identifier identifier = ParseIdentifier(tokens);
@@ -148,7 +164,7 @@ namespace FTG.Studios.Robol.Compiler
 			ParseTree.Expression expression = ParseExpression(tokens);
 			MatchFail(tokens.Dequeue(), TokenType.Semicolon);
 
-			return new ParseTree.Declaration(Syntax.GetType((Syntax.Keyword)token.Value), identifier, expression);
+			return new ParseTree.Declaration(Syntax.GetType((Syntax.Keyword)token.Value), identifier, expression, line, column);
 		}
 
 		// Assignment ::= Identifier = Expression;
@@ -159,7 +175,7 @@ namespace FTG.Studios.Robol.Compiler
 			ParseTree.Expression expression = ParseExpression(tokens);
 			MatchFail(tokens.Dequeue(), TokenType.Semicolon);
 
-			return new ParseTree.Assignment(identifier, expression);
+			return new ParseTree.Assignment(identifier, expression, identifier.Line, identifier.Column);
 		}
 
 		// Return ::= return Expression;
@@ -167,7 +183,7 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			MatchFail(tokens.Dequeue(), TokenType.Keyword, Syntax.Keyword.Return);
 			ParseTree.Expression expression = ParseExpression(tokens);
-			ParseTree.Return statement = new ParseTree.Return(expression);
+			ParseTree.Return statement = new ParseTree.Return(expression, expression.Line, expression.Column);
 			MatchFail(tokens.Dequeue(), TokenType.Semicolon);
 
 			return statement;
@@ -177,9 +193,13 @@ namespace FTG.Studios.Robol.Compiler
 		static ParseTree.Identifier ParseIdentifier(Queue<Token> tokens)
 		{
 			Token token = tokens.Dequeue();
+
+			int line = token.Line;
+			int column = token.Column;
+
 			MatchFail(token, TokenType.Identifier);
 
-			return new ParseTree.Identifier(token.Value as string);
+			return new ParseTree.Identifier(token.Value as string, line, column);
 		}
 
 		// Expression ::= AdditiveExpression
@@ -193,11 +213,11 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			ParseTree.MultiplicativeExpression multiplicative = ParseMultiplicativeExpression(tokens);
 
-			if (!Match(tokens.Peek(), TokenType.AdditiveOperator)) return new ParseTree.AdditiveExpression('\0', multiplicative, null);
+			if (!Match(tokens.Peek(), TokenType.AdditiveOperator)) return new ParseTree.AdditiveExpression('\0', multiplicative, null, multiplicative.Line, multiplicative.Column);
 			Token token = tokens.Dequeue();
 
 			ParseTree.Expression expression = ParseExpression(tokens);
-			return new ParseTree.AdditiveExpression((char)token.Value, multiplicative, expression);
+			return new ParseTree.AdditiveExpression((char)token.Value, multiplicative, expression, multiplicative.Line, multiplicative.Column);
 		}
 
 		// MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
@@ -205,11 +225,11 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			ParseTree.ExponentialExpression exponential = ParseExponentialExpression(tokens);
 
-			if (!Match(tokens.Peek(), TokenType.MultiplicativeOperator)) return new ParseTree.MultiplicativeExpression('\0', exponential, null);
+			if (!Match(tokens.Peek(), TokenType.MultiplicativeOperator)) return new ParseTree.MultiplicativeExpression('\0', exponential, null, exponential.Line, exponential.Column);
 			Token token = tokens.Dequeue();
 
 			ParseTree.Expression expression = ParseExpression(tokens);
-			return new ParseTree.MultiplicativeExpression((char)token.Value, exponential, expression);
+			return new ParseTree.MultiplicativeExpression((char)token.Value, exponential, expression, exponential.Line, exponential.Column);
 		}
 
 		// ExponentialExpression::= Primary ^ Primary
@@ -217,11 +237,11 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			ParseTree.Primary lhs = ParsePrimary(tokens);
 
-			if (!Match(tokens.Peek(), TokenType.ExponentialOperator)) return new ParseTree.ExponentialExpression('\0', lhs, null);
+			if (!Match(tokens.Peek(), TokenType.ExponentialOperator)) return new ParseTree.ExponentialExpression('\0', lhs, null, lhs.Line, lhs.Column);
 			Token token = tokens.Dequeue();
 
 			ParseTree.Primary rhs = ParsePrimary(tokens);
-			return new ParseTree.ExponentialExpression((char)token.Value, lhs, rhs);
+			return new ParseTree.ExponentialExpression((char)token.Value, lhs, rhs, lhs.Line, lhs.Column);
 		}
 
 		// Primary ::= Identifier | FunctionCall | (Expression) | IntegerConstant | NumberConstant | StringConstant | BooleanConstant | UnaryOperator Primary
@@ -231,11 +251,11 @@ namespace FTG.Studios.Robol.Compiler
 
 			if (Match(token, TokenType.Identifier))
 			{
-				ParseTree.Identifier identifier = new ParseTree.Identifier(token.Value as string);
+				ParseTree.Identifier identifier = new ParseTree.Identifier(token.Value as string, token.Line, token.Column);
 				if (Match(tokens.Peek(), TokenType.OpenParenthesis))
 				{ // FunctionCall
 					MatchFail(tokens.Dequeue(), TokenType.OpenParenthesis);
-					ParseTree.FunctionCall call = new ParseTree.FunctionCall(identifier, ParseArgumentList(tokens));
+					ParseTree.FunctionCall call = new ParseTree.FunctionCall(identifier, ParseArgumentList(tokens), token.Line, token.Column);
 					MatchFail(tokens.Dequeue(), TokenType.CloseParenthesis);
 					return call;
 				}
@@ -251,25 +271,25 @@ namespace FTG.Studios.Robol.Compiler
 
 			if (Match(token, TokenType.IntegerConstant))
 			{
-				return new ParseTree.IntegerConstant((int)token.Value);
+				return new ParseTree.IntegerConstant((int)token.Value, token.Line, token.Column);
 			}
 
 			if (Match(token, TokenType.NumberConstant))
 			{
-				return new ParseTree.NumberConstant((float)token.Value);
+				return new ParseTree.NumberConstant((float)token.Value, token.Line, token.Column);
 			}
 
 			if (Match(token, TokenType.StringConstant))
 			{
-				return new ParseTree.StringConstant(token.Value as string);
+				return new ParseTree.StringConstant(token.Value as string, token.Line, token.Column);
 			}
 
-			if (Match(token, TokenType.Keyword)) if (Syntax.IsBooleanConstant((Syntax.Keyword)token.Value)) return new ParseTree.BooleanConstant((Syntax.Keyword)token.Value == Syntax.Keyword.True);
+			if (Match(token, TokenType.Keyword)) if (Syntax.IsBooleanConstant((Syntax.Keyword)token.Value)) return new ParseTree.BooleanConstant((Syntax.Keyword)token.Value == Syntax.Keyword.True, token.Line, token.Column);
 				else Fail(token);
 
 			if (!Match(token, TokenType.UnaryOperator) && !Match(token, TokenType.AdditiveOperator, Syntax.operator_subtraction)) Fail(token);
 			ParseTree.Primary primary = ParsePrimary(tokens);
-			return new ParseTree.UnaryExpression((char)token.Value, primary);
+			return new ParseTree.UnaryExpression((char)token.Value, primary, token.Line, token.Column);
 		}
 
 		static bool Match(Token token, TokenType type)

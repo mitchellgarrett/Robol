@@ -22,7 +22,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 					identifier,
 					typeof(void),
 					new ParseTree.BuiltinFunction(
-						new ParseTree.Identifier(identifier),
+						new ParseTree.Identifier(identifier, 0, 0),
 						Syntax.GetType(Syntax.Keyword.Number),
 						new ParseTree.ParameterList((Syntax.GetType(Syntax.Keyword.Number), "value"))
 						)

@@ -19,15 +19,25 @@ namespace FTG.Studios.Robol.Compiler
 		}
 
 		/*** PROGRAM ***/
-		public interface ASTNode { }
+		public abstract class ASTNode
+		{
+			public readonly int Line;
+			public readonly int Column;
+
+			protected ASTNode(int line, int column)
+			{
+				this.Line = line;
+				this.Column = column;
+			}
+		}
 
 		public class Program : ASTNode
 		{
 
-			public Function Main;
-			public FunctionList List;
+			public readonly Function Main;
+			public readonly FunctionList List;
 
-			public Program(Function main, FunctionList list)
+			public Program(Function main, FunctionList list, int line, int column) : base(line, column)
 			{
 				this.Main = main;
 				this.List = list;
@@ -43,10 +53,10 @@ namespace FTG.Studios.Robol.Compiler
 		public class FunctionList : ASTNode
 		{
 
-			public Function Function;
-			public FunctionList List;
+			public readonly Function Function;
+			public readonly FunctionList List;
 
-			public FunctionList(Function statement, FunctionList list)
+			public FunctionList(Function statement, FunctionList list, int line, int column) : base(line, column)
 			{
 				this.Function = statement;
 				this.List = list;
@@ -61,12 +71,12 @@ namespace FTG.Studios.Robol.Compiler
 		public class Function : ASTNode
 		{
 
-			public Identifier Identifier;
-			public Type ReturnType;
-			public ParameterList Parameters;
-			public StatementList Body;
+			public readonly Identifier Identifier;
+			public readonly Type ReturnType;
+			public readonly ParameterList Parameters;
+			public readonly StatementList Body;
 
-			public Function(Identifier identifer, Type returnType, ParameterList parameters, StatementList body)
+			public Function(Identifier identifer, Type returnType, ParameterList parameters, StatementList body, int line, int column) : base(line, column)
 			{
 				this.Identifier = identifer;
 				this.ReturnType = returnType;
@@ -82,7 +92,7 @@ namespace FTG.Studios.Robol.Compiler
 
 		public class BuiltinFunction : Function
 		{
-			public BuiltinFunction(Identifier identifier, Type returnType, ParameterList parameters) : base(identifier, returnType, parameters, null) { }
+			public BuiltinFunction(Identifier identifier, Type returnType, ParameterList parameters) : base(identifier, returnType, parameters, null, 0, 0) { }
 
 			public override string ToString()
 			{
@@ -96,20 +106,20 @@ namespace FTG.Studios.Robol.Compiler
 			public Parameter Parameter;
 			public ParameterList List;
 
-			public ParameterList(Parameter parameter, ParameterList list)
+			public ParameterList(Parameter parameter, ParameterList list, int line, int column) : base(line, column)
 			{
 				this.Parameter = parameter;
 				this.List = list;
 			}
 
-			private ParameterList() { }
+			private ParameterList(int line, int column) : base(line, column) { }
 
-			public ParameterList(params (Type type, string identifier)[] pairs)
+			public ParameterList(params (Type type, string identifier)[] pairs) : base(0, 0)
 			{
 				ParameterList list = this;
 				for (int i = 0; i < pairs.Length; ++i)
 				{
-					list.Parameter = new Parameter(pairs[i].type, new Identifier(pairs[i].identifier));
+					list.Parameter = new Parameter(pairs[i].type, new Identifier(pairs[i].identifier, 0, 0), 0, 0);
 					if (i < pairs.Length - 1)
 					{
 						list.List = new ParameterList();
@@ -127,10 +137,10 @@ namespace FTG.Studios.Robol.Compiler
 		public class Parameter : ASTNode
 		{
 
-			public Type Type;
-			public Identifier Identifier;
+			public readonly Type Type;
+			public readonly Identifier Identifier;
 
-			public Parameter(Type type, Identifier identifier)
+			public Parameter(Type type, Identifier identifier, int line, int column) : base(line, column)
 			{
 				this.Type = type;
 				this.Identifier = identifier;
@@ -145,10 +155,10 @@ namespace FTG.Studios.Robol.Compiler
 		public class ArgumentList : ASTNode
 		{
 
-			public Argument Argument;
-			public ArgumentList List;
+			public readonly Argument Argument;
+			public readonly ArgumentList List;
 
-			public ArgumentList(Argument argument, ArgumentList list)
+			public ArgumentList(Argument argument, ArgumentList list, int line, int column) : base(line, column)
 			{
 				this.Argument = argument;
 				this.List = list;
@@ -163,9 +173,9 @@ namespace FTG.Studios.Robol.Compiler
 		public class Argument : ASTNode
 		{
 
-			public Primary Primary;
+			public readonly Primary Primary;
 
-			public Argument(Primary primary)
+			public Argument(Primary primary, int line, int column) : base(line, column)
 			{
 				this.Primary = primary;
 			}
@@ -178,15 +188,18 @@ namespace FTG.Studios.Robol.Compiler
 		#endregion
 
 		#region Statements
-		public interface Statement : ASTNode { }
+		public abstract class Statement : ASTNode
+		{
+			protected Statement(int line, int column) : base(line, column) { }
+		}
 
 		public class StatementList : ASTNode
 		{
 
-			public Statement Statement;
-			public StatementList List;
+			public readonly Statement Statement;
+			public readonly StatementList List;
 
-			public StatementList(Statement statement, StatementList list)
+			public StatementList(Statement statement, StatementList list, int line, int column) : base(line, column)
 			{
 				this.Statement = statement;
 				this.List = list;
@@ -201,11 +214,11 @@ namespace FTG.Studios.Robol.Compiler
 		public class Declaration : Statement
 		{
 
-			public Type Type;
-			public Identifier Identifier;
-			public Expression Expression;
+			public readonly Type Type;
+			public readonly Identifier Identifier;
+			public readonly Expression Expression;
 
-			public Declaration(Type type, Identifier identifier, Expression expression)
+			public Declaration(Type type, Identifier identifier, Expression expression, int line, int column) : base(line, column)
 			{
 				this.Type = type;
 				this.Identifier = identifier;
@@ -221,10 +234,10 @@ namespace FTG.Studios.Robol.Compiler
 		public class Assignment : Statement
 		{
 
-			public Identifier Identifier;
-			public Expression Expression;
+			public readonly Identifier Identifier;
+			public readonly Expression Expression;
 
-			public Assignment(Identifier identifier, Expression expression)
+			public Assignment(Identifier identifier, Expression expression, int line, int column) : base(line, column)
 			{
 				this.Identifier = identifier;
 				this.Expression = expression;
@@ -239,9 +252,9 @@ namespace FTG.Studios.Robol.Compiler
 		public class Return : Statement
 		{
 
-			public Expression Expression;
+			public readonly Expression Expression;
 
-			public Return(Expression expression)
+			public Return(Expression expression, int line, int column) : base(line, column)
 			{
 				this.Expression = expression;
 			}
@@ -254,15 +267,18 @@ namespace FTG.Studios.Robol.Compiler
 		#endregion
 
 		#region Expressions
-		public interface Expression : ASTNode, Primary { }
+		public abstract class Expression : Primary
+		{
+			protected Expression(int line, int column) : base(line, column) { }
+		}
 
 		public class UnaryExpression : Expression
 		{
 
-			public char Operator;
-			public Primary Primary;
+			public readonly char Operator;
+			public readonly Primary Primary;
 
-			public UnaryExpression(char op, Primary exp)
+			public UnaryExpression(char op, Primary exp, int line, int column) : base(line, column)
 			{
 				this.Operator = op;
 				this.Primary = exp;
@@ -277,11 +293,11 @@ namespace FTG.Studios.Robol.Compiler
 		public class AdditiveExpression : Expression
 		{
 
-			public char Operator;
-			public MultiplicativeExpression LeftExpression;
-			public Expression RightExpression;
+			public readonly char Operator;
+			public readonly MultiplicativeExpression LeftExpression;
+			public readonly Expression RightExpression;
 
-			public AdditiveExpression(char op, MultiplicativeExpression lhs, Expression rhs)
+			public AdditiveExpression(char op, MultiplicativeExpression lhs, Expression rhs, int line, int column) : base(line, column)
 			{
 				this.Operator = op;
 				this.LeftExpression = lhs;
@@ -297,11 +313,11 @@ namespace FTG.Studios.Robol.Compiler
 		public class MultiplicativeExpression : Expression
 		{
 
-			public char Operator;
-			public ExponentialExpression LeftExpression;
-			public Expression RightExpression;
+			public readonly char Operator;
+			public readonly ExponentialExpression LeftExpression;
+			public readonly Expression RightExpression;
 
-			public MultiplicativeExpression(char op, ExponentialExpression lhs, Expression rhs)
+			public MultiplicativeExpression(char op, ExponentialExpression lhs, Expression rhs, int line, int column) : base(line, column)
 			{
 				this.Operator = op;
 				this.LeftExpression = lhs;
@@ -317,11 +333,11 @@ namespace FTG.Studios.Robol.Compiler
 		public class ExponentialExpression : Expression
 		{
 
-			public char Operator;
-			public Primary LeftExpression;
-			public Primary RightExpression;
+			public readonly char Operator;
+			public readonly Primary LeftExpression;
+			public readonly Primary RightExpression;
 
-			public ExponentialExpression(char op, Primary lhs, Primary rhs)
+			public ExponentialExpression(char op, Primary lhs, Primary rhs, int line, int column) : base(line, column)
 			{
 				this.Operator = op;
 				this.LeftExpression = lhs;
@@ -336,14 +352,17 @@ namespace FTG.Studios.Robol.Compiler
 		#endregion
 
 		#region Primaries
-		public interface Primary : ASTNode { }
+		public abstract class Primary : ASTNode
+		{
+			protected Primary(int line, int column) : base(line, column) { }
+		}
 
 		public class Identifier : Primary
 		{
 
-			public string Value;
+			public readonly string Value;
 
-			public Identifier(string value)
+			public Identifier(string value, int line, int column) : base(line, column)
 			{
 				this.Value = value;
 			}
@@ -357,10 +376,10 @@ namespace FTG.Studios.Robol.Compiler
 		public class FunctionCall : Primary
 		{
 
-			public Identifier Identifier;
-			public ArgumentList Arguments;
+			public readonly Identifier Identifier;
+			public readonly ArgumentList Arguments;
 
-			public FunctionCall(Identifier identifier, ArgumentList arguments)
+			public FunctionCall(Identifier identifier, ArgumentList arguments, int line, int column) : base(line, column)
 			{
 				this.Identifier = identifier;
 				this.Arguments = arguments;
@@ -375,9 +394,9 @@ namespace FTG.Studios.Robol.Compiler
 		public class IntegerConstant : Primary
 		{
 
-			public int Value;
+			public readonly int Value;
 
-			public IntegerConstant(int value)
+			public IntegerConstant(int value, int line, int column) : base(line, column)
 			{
 				this.Value = value;
 			}
@@ -391,9 +410,9 @@ namespace FTG.Studios.Robol.Compiler
 		public class NumberConstant : Primary
 		{
 
-			public float Value;
+			public readonly float Value;
 
-			public NumberConstant(float value)
+			public NumberConstant(float value, int line, int column) : base(line, column)
 			{
 				this.Value = value;
 			}
@@ -407,9 +426,9 @@ namespace FTG.Studios.Robol.Compiler
 		public class StringConstant : Primary
 		{
 
-			public string Value;
+			public readonly string Value;
 
-			public StringConstant(string value)
+			public StringConstant(string value, int line, int column) : base(line, column)
 			{
 				this.Value = value;
 			}
@@ -423,9 +442,9 @@ namespace FTG.Studios.Robol.Compiler
 		public class BooleanConstant : Primary
 		{
 
-			public bool Value;
+			public readonly bool Value;
 
-			public BooleanConstant(bool value)
+			public BooleanConstant(bool value, int line, int column) : base(line, column)
 			{
 				this.Value = value;
 			}

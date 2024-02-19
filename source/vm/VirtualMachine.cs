@@ -44,7 +44,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 			}
 			catch (Exception exception)
 			{
-				Console.Error.WriteLine($"{exception.GetType()}: {exception.Message}");
+				Console.Error.WriteLine($"{exception.GetType()}:\n{exception.Message}");
 			}
 		}
 
@@ -97,7 +97,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 		{
 			Symbol symbol = localScope.GetSymbol(statement.Identifier.Value);
 
-			if (symbol == null) throw new ArgumentNullException(statement.Identifier.Value, $"Variable does not exist!");
+			if (symbol == null) throw new ArgumentNullException($"({statement.Line}, {statement.Column}): '{statement.Identifier}'", $"Variable not defined");
 
 			symbol.SetValue(EvaluateExpression(statement.Expression));
 			return null;
