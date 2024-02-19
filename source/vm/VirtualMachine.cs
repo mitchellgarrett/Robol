@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using FTG.Studios.Robol.Compiler;
 
 namespace FTG.Studios.Robol.VirtualMachine
@@ -25,7 +24,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 		public void RegisterConsoleOutput(Action<object, MessageSeverity> cb) { ConsoleOutput += cb; }
 		public void UnregisterConsoleOutput(Action<object, MessageSeverity> cb) { ConsoleOutput -= cb; }
 
-		public void Run()
+		public object Run()
 		{
 			globalScope.Clear();
 			Library.AddBuiltinFunctionsToSymbolTable(globalScope);
@@ -40,20 +39,22 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 			try
 			{
-				EvaluateProgram(program.Root);
+				return EvaluateProgram(program.Root);
 			}
 			catch (Exception exception)
 			{
-				Console.Error.WriteLine($"{exception.GetType()}:\n{exception.Message}");
+				ConsoleOutput?.Invoke($"{exception.GetType()}:\n{exception.Message}", MessageSeverity.Error);
 			}
+			return null;
 		}
 
 		#region Program
-		void EvaluateProgram(ParseTree.Program program)
+		object EvaluateProgram(ParseTree.Program program)
 		{
 			localScope = globalScope.PushScope();
-			ConsoleOutput?.Invoke(EvaluateFunction(program.Main), MessageSeverity.Normal);
+			object result = EvaluateFunction(program.Main);
 			localScope = localScope.PopScope();
+			return result;
 		}
 
 		object EvaluateFunction(ParseTree.Function function)

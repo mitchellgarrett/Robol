@@ -49,6 +49,7 @@ class Application
 			Console.WriteLine(o);
 		});
 
-		vm.Run();
+		object result = vm.Run();
+		Console.WriteLine($"Program result: {result}");
 	}
 }

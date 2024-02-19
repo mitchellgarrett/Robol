@@ -5,6 +5,7 @@ Function ::= ReturnType Identifier(ParameterList) { StatementList }
 StatementList ::= Statement StatementList | null
 Statement ::= Declaration | Initialization | Assignment | FunctionCall | return Expression
 
+// TODO: make distinction between definition/declaration
 Declaration ::= VariableType Identifier; | VariableType Identifier = Expression;
 Assignment ::= Identifier = Expression;
 
@@ -30,7 +31,16 @@ CharacterConstant ::= '[a-zA-Z0-9]'
 StringConstant ::= "[a-zA-Z0-9]*"
 
 VariableType ::= int | num | byte | char | string | obj | ClassType
+Identifier ::= ([_a-zA-Z][_a-zA-Z0-9]*)([\._a-zA-Z][_a-zA-Z0-9]*) // TODO: remove '.'
 
-ClassDeclaration ::= class Identifier { ClassMemberList }
+// TODO:
+// Comments
+// Loops
+// Classes
+// Libraries
+// File inclusion
+
+ClassDeclaration ::= class ClassType { ClassMemberList }
+ClassType ::= Identifier
 ClassMemberList ::= ClassMember ClassMemberList | null
 ClassMember ::= Declaration | Function
