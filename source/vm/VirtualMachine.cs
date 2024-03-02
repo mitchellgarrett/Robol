@@ -181,6 +181,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 			if (primary is ParseTree.IntegerConstant) return EvaluatePrimary(primary as ParseTree.IntegerConstant);
 			if (primary is ParseTree.NumberConstant) return EvaluatePrimary(primary as ParseTree.NumberConstant);
 			if (primary is ParseTree.StringConstant) return EvaluatePrimary(primary as ParseTree.StringConstant);
+			if (primary is ParseTree.BooleanConstant) return EvaluatePrimary(primary as ParseTree.BooleanConstant);
 			if (primary is ParseTree.Expression) return EvaluateExpression(primary as ParseTree.Expression);
 			return null;
 		}

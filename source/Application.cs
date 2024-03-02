@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using FTG.Studios.Robol.Compiler;
 using FTG.Studios.Robol.VirtualMachine;
-using Internal;
 
 class Application
 {
@@ -41,6 +40,9 @@ class Application
 		Console.WriteLine("Parse tree:");
 		Console.WriteLine(output);
 		Console.WriteLine();
+
+		string tac = CodeGenerator.Generate(output);
+		File.WriteAllText(Path.ChangeExtension(file_name, ".tac").Replace("programs", "build"), tac);
 
 		VirtualMachine vm = new VirtualMachine(output);
 

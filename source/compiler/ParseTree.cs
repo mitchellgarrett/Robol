@@ -112,8 +112,6 @@ namespace FTG.Studios.Robol.Compiler
 				this.List = list;
 			}
 
-			private ParameterList(int line, int column) : base(line, column) { }
-
 			public ParameterList(params (Type type, string identifier)[] pairs) : base(0, 0)
 			{
 				ParameterList list = this;
