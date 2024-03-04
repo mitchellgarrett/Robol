@@ -109,8 +109,8 @@ namespace FTG.Studios.Robol.VirtualMachine
 		object EvaluateExpression(ParseTree.Expression expression)
 		{
 			if (expression is ParseTree.UnaryExpression) return EvaluateExpression(expression as ParseTree.UnaryExpression);
-			if (expression is ParseTree.AdditiveExpression) return EvaluateExpression(expression as ParseTree.AdditiveExpression);
-			if (expression is ParseTree.MultiplicativeExpression) return EvaluateExpression(expression as ParseTree.MultiplicativeExpression);
+			if (expression is ParseTree.ArithmeticExpression) return EvaluateExpression(expression as ParseTree.ArithmeticExpression);
+			if (expression is ParseTree.LogicalExpression) return EvaluateExpression(expression as ParseTree.LogicalExpression);
 			return null;
 		}
 
@@ -126,7 +126,25 @@ namespace FTG.Studios.Robol.VirtualMachine
 			return 0;
 		}
 
-		float EvaluateExpression(ParseTree.AdditiveExpression expression)
+		// TODO: Make these work
+		bool EvaluateExpression(ParseTree.LogicalExpression expression)
+		{
+			return EvaluateExpression(expression.Expression);
+		}
+
+		bool EvaluateExpression(ParseTree.LogicalOrExpression expression)
+		{
+			bool rhs = EvaluateExpression(expression.RightExpression);
+			if (expression.LeftExpression != null) rhs = EvaluateExpression(expression.LeftExpression) || rhs;
+			return rhs;
+		}
+
+		bool EvaluateExpression(ParseTree.LogicalAndExpression expression)
+		{
+			return EvaluateExpression(expression.LeftExpression) && EvaluateExpression(expression.RightExpression);
+		}
+
+		float EvaluateExpression(ParseTree.ArithmeticExpression expression)
 		{
 			float lhs = (float)EvaluateExpression(expression.LeftExpression);
 			if (expression.Operator == '\0') return lhs;

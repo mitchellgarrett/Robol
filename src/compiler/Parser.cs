@@ -202,22 +202,22 @@ namespace FTG.Studios.Robol.Compiler
 			return new ParseTree.Identifier(token.Value as string, line, column);
 		}
 
-		// Expression ::= AdditiveExpression
+		// Expression ::= UnaryExpression | ArithmeticExpression | LogicalExpression
 		static ParseTree.Expression ParseExpression(Queue<Token> tokens)
 		{
-			return ParseAdditiveExpression(tokens);
+			return ParseArithmeticExpression(tokens);
 		}
 
-		// AdditiveExpression ::= MultiplicativeExpression +|- Expression
-		static ParseTree.AdditiveExpression ParseAdditiveExpression(Queue<Token> tokens)
+		// ArithmeticExpression ::= MultiplicativeExpression +|- Expression
+		static ParseTree.ArithmeticExpression ParseArithmeticExpression(Queue<Token> tokens)
 		{
 			ParseTree.MultiplicativeExpression multiplicative = ParseMultiplicativeExpression(tokens);
 
-			if (!Match(tokens.Peek(), TokenType.AdditiveOperator)) return new ParseTree.AdditiveExpression('\0', multiplicative, null, multiplicative.Line, multiplicative.Column);
+			if (!Match(tokens.Peek(), TokenType.AdditiveOperator)) return new ParseTree.ArithmeticExpression('\0', multiplicative, null, multiplicative.Line, multiplicative.Column);
 			Token token = tokens.Dequeue();
 
 			ParseTree.Expression expression = ParseExpression(tokens);
-			return new ParseTree.AdditiveExpression((char)token.Value, multiplicative, expression, multiplicative.Line, multiplicative.Column);
+			return new ParseTree.ArithmeticExpression((char)token.Value, multiplicative, expression, multiplicative.Line, multiplicative.Column);
 		}
 
 		// MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
@@ -243,6 +243,10 @@ namespace FTG.Studios.Robol.Compiler
 			ParseTree.Primary rhs = ParsePrimary(tokens);
 			return new ParseTree.ExponentialExpression((char)token.Value, lhs, rhs, lhs.Line, lhs.Column);
 		}
+
+		// LogicalExpression ::= LogicalOrExpression
+		// LogicalOrExpression ::= LogicalAndExpression | LogicalOrExpression or LogicalAndExpression
+		// LogicalAndExpression ::= LogicalAndExpression and LogicalOrExpression | null
 
 		// Primary ::= Identifier | FunctionCall | (Expression) | IntegerConstant | NumberConstant | StringConstant | BooleanConstant | UnaryOperator Primary
 		static ParseTree.Primary ParsePrimary(Queue<Token> tokens)

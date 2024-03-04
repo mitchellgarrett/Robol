@@ -288,14 +288,14 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class AdditiveExpression : Expression
+		public class ArithmeticExpression : Expression
 		{
 
 			public readonly char Operator;
 			public readonly MultiplicativeExpression LeftExpression;
 			public readonly Expression RightExpression;
 
-			public AdditiveExpression(char op, MultiplicativeExpression lhs, Expression rhs, int line, int column) : base(line, column)
+			public ArithmeticExpression(char op, MultiplicativeExpression lhs, Expression rhs, int line, int column) : base(line, column)
 			{
 				this.Operator = op;
 				this.LeftExpression = lhs;
@@ -345,6 +345,55 @@ namespace FTG.Studios.Robol.Compiler
 			public override string ToString()
 			{
 				return LeftExpression?.ToString() + (Operator != '\0' ? Operator.ToString() : null) + RightExpression?.ToString();
+			}
+		}
+
+		public class LogicalExpression : Expression
+		{
+			public readonly LogicalOrExpression Expression;
+
+			public LogicalExpression(LogicalOrExpression expression, int line, int column) : base(line, column)
+			{
+				this.Expression = expression;
+			}
+
+			public override string ToString()
+			{
+				return Expression.ToString();
+			}
+		}
+
+		public class LogicalOrExpression : Expression
+		{
+			public readonly LogicalOrExpression LeftExpression;
+			public readonly LogicalAndExpression RightExpression;
+
+			public LogicalOrExpression(LogicalOrExpression lhs, LogicalAndExpression rhs, int line, int column) : base(line, column)
+			{
+				this.LeftExpression = lhs;
+				this.RightExpression = rhs;
+			}
+
+			public override string ToString()
+			{
+				return $"({LeftExpression} or {RightExpression})";
+			}
+		}
+
+		public class LogicalAndExpression : Expression
+		{
+			public readonly LogicalAndExpression LeftExpression;
+			public readonly LogicalOrExpression RightExpression;
+
+			public LogicalAndExpression(LogicalAndExpression lhs, LogicalOrExpression rhs, int line, int column) : base(line, column)
+			{
+				this.LeftExpression = lhs;
+				this.RightExpression = rhs;
+			}
+
+			public override string ToString()
+			{
+				return $"({LeftExpression} and {RightExpression})";
 			}
 		}
 		#endregion
@@ -401,7 +450,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Value.ToString();
+				return $"{Value.ToString()} ({Value.GetType()})";
 			}
 		}
 
@@ -417,7 +466,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Value.ToString();
+				return $"{Value.ToString()} ({Value.GetType()})";
 			}
 		}
 
@@ -433,7 +482,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Value.ToString();
+				return $"{Value.ToString()} ({Value.GetType()})";
 			}
 		}
 
@@ -449,7 +498,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return Value.ToString();
+				return $"{Value.ToString()} ({Value.GetType()})";
 			}
 		}
 		#endregion

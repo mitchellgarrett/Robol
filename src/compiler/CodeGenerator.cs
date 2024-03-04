@@ -114,12 +114,12 @@ namespace FTG.Studios.Robol.Compiler
 			if (expression == null) return string.Empty;
 
 			//if (expression is ParseTree.UnaryExpression) return Generate(expression as ParseTree.UnaryExpression);
-			if (expression is ParseTree.AdditiveExpression) return GenerateExpression(expression as ParseTree.AdditiveExpression);
+			if (expression is ParseTree.ArithmeticExpression) return GenerateExpression(expression as ParseTree.ArithmeticExpression);
 			Console.Error.WriteLine($"ERROR: GenerateExpression did not produce any code ({expression})");
 			return string.Empty;
 		}
 
-		static string GenerateExpression(ParseTree.AdditiveExpression expression)
+		static string GenerateExpression(ParseTree.ArithmeticExpression expression)
 		{
 			string output = GenerateExpression(expression.LeftExpression);
 			string lhs = GetCurrentTemporaryVariable();
