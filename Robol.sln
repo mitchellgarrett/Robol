@@ -1,22 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.810.25
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robol", "Robol.csproj", "{3CDD00BD-BD69-42A5-B1DE-FA811525FB66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robol", "Robol.csproj", "{CE8A468A-07AC-4E41-9C76-A7AD9FA04B22}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|anycpu = Debug|anycpu
+		Release|anycpu = Release|anycpu
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE8A468A-07AC-4E41-9C76-A7AD9FA04B22}.Debug|anycpu.ActiveCfg = Debug|anycpu
+		{CE8A468A-07AC-4E41-9C76-A7AD9FA04B22}.Debug|anycpu.Build.0 = Debug|anycpu
+		{CE8A468A-07AC-4E41-9C76-A7AD9FA04B22}.Release|anycpu.ActiveCfg = Release|anycpu
+		{CE8A468A-07AC-4E41-9C76-A7AD9FA04B22}.Release|anycpu.Build.0 = Release|anycpu
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3CDD00BD-BD69-42A5-B1DE-FA811525FB66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3CDD00BD-BD69-42A5-B1DE-FA811525FB66}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3CDD00BD-BD69-42A5-B1DE-FA811525FB66}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3CDD00BD-BD69-42A5-B1DE-FA811525FB66}.Release|Any CPU.Build.0 = Release|Any CPU
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D17B1510-C570-4E0B-8620-C9F1B35A7A9B}
 	EndGlobalSection
 EndGlobal
