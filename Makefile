@@ -1,7 +1,7 @@
 rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
 
 TARGET = $(BUILD_DIR)/robol.exe
-SRC_DIR = source
+SRC_DIR = src
 BUILD_DIR = build
 SOURCES := $(call rwildcard,$(SRC_DIR)/,*.cs)
 
