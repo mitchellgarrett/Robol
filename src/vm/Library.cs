@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using FTG.Studios.Robol.Compiler;
-using Internal;
 
-namespace FTG.Studios.Robol.VirtualMachine
+namespace FTG.Studios.Robol.VM
 {
 
 	public static class Library
@@ -18,7 +17,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 		{
 			foreach (string identifier in builtin_functions.Keys)
 			{
-				symbols.InsertSymbol(
+				symbols.DefineSymbol(
 					identifier,
 					typeof(void),
 					new ParseTree.BuiltinFunction(

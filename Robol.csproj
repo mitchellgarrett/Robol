@@ -1,47 +1,139 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">anycpu</Platform>
-    <ProjectGuid>{CE8A468A-07AC-4E41-9C76-A7AD9FA04B22}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Robol</RootNamespace>
-    <AssemblyName>Robol</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|anycpu' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ExternalConsole>true</ExternalConsole>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|anycpu' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ExternalConsole>true</ExternalConsole>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="System" />
+    <Compile Remove="test\VirtualMachineTest.cs" />
+    <Compile Remove="test\obj\Debug\netcoreapp3.1\.NETCoreApp,Version=v3.1.AssemblyAttributes.cs" />
+    <Compile Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.AssemblyInfo.cs" />
+    <Compile Remove="test\VirtualMachineTest.cs" />
+    <Compile Remove="test\VirtualMachineTest.cs" />
+    <Compile Remove="test\SymbolTableTest.cs" />
+    <Compile Remove="test\SymbolTableTest.cs" />
+    <Compile Remove="test\SymbolTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\Application.cs" />
-    <Compile Include="src\vm\Symbol.cs" />
-    <Compile Include="src\vm\SymbolTable.cs" />
-    <Compile Include="src\vm\VirtualMachine.cs" />
-    <Compile Include="src\vm\Library.cs" />
-    <Compile Include="src\compiler\CodeGenerator.cs" />
-    <Compile Include="src\compiler\Token.cs" />
-    <Compile Include="src\compiler\Compiler.cs" />
-    <Compile Include="src\compiler\ParseTree.cs" />
-    <Compile Include="src\compiler\Parser.cs" />
-    <Compile Include="src\compiler\Lexer.cs" />
-    <Compile Include="src\compiler\Syntax.cs" />
+    <None Remove="test\obj\Robol Tester.csproj.nuget.g.targets" />
+    <None Remove="test\obj\project.nuget.cache" />
+    <None Remove="test\obj\Robol Tester.csproj.nuget.dgspec.json" />
+    <None Remove="test\obj\Robol Tester.csproj.nuget.g.props" />
+    <None Remove="test\obj\project.assets.json" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.AssemblyReference.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.assets.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\RobolTester.csproj.AssemblyReference.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.FileListAbsolute.txt" />
+    <None Remove="test\.DS_Store" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.TestPlatform.CrossPlatEngine.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.TestPlatform.CommunicationUtilities.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.TestPlatform.PlatformAbstractions.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.VisualStudio.CodeCoverage.Shim.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.TestPlatform.CoreUtilities.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.TestPlatform.Utilities.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\testhost.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Microsoft.VisualStudio.TestPlatform.Common.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\nunit.framework.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\cs\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\cs\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\de\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\de\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\es\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\es\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\fr\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\fr\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\it\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\it\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ja\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ja\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ko\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ko\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pl\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pl\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pt-BR\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ru\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pt-BR\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ru\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\tr\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\tr\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hans\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hans\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hant\Microsoft.VisualStudio.TestPlatform.ObjectModel.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hant\Microsoft.TestPlatform.CoreUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\cs\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\cs\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\cs\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\de\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\de\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\de\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\es\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\es\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\es\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\fr\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\fr\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\fr\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\it\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\it\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\it\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ja\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ja\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ja\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ko\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ko\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ko\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pl\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pl\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pl\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pt-BR\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pt-BR\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\pt-BR\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ru\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ru\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\ru\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\tr\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\tr\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\tr\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hans\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hans\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hans\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hant\Microsoft.TestPlatform.CommunicationUtilities.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hant\Microsoft.TestPlatform.CrossPlatEngine.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\zh-Hant\Microsoft.VisualStudio.TestPlatform.Common.resources.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol.pdb" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol.runtimeconfig.json" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\NUnit3.TestAdapter.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol.runtimeconfig.dev.json" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\NUnit3.TestAdapter.pdb" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\nunit.engine.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol.deps.json" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\nunit.engine.api.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\nunit.engine.core.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\testcentric.engine.metadata.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol Tester.deps.json" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol Tester.runtimeconfig.json" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol Tester.runtimeconfig.dev.json" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol Tester.dll" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\Robol Tester.pdb" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.AssemblyReference.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.GeneratedMSBuildEditorConfig.editorconfig" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.AssemblyInfoInputs.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.CoreCompileInputs.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.dll" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.pdb" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.CopyComplete" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.genruntimeconfig.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.FileListAbsolute.txt" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.AssemblyReference.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.AssemblyReference.cache" />
+    <None Remove="test\obj\project.assets.json" />
+    <None Remove="test\obj\project.nuget.cache" />
+    <None Remove="test\obj\Robol Tester.csproj.nuget.dgspec.json" />
+    <None Remove="test\bin\Debug\netcoreapp3.1\nunit_random_seed.tmp" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.AssemblyReference.cache" />
+    <None Remove="test\obj\Debug\netcoreapp3.1\Robol Tester.csproj.AssemblyReference.cache" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

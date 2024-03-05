@@ -1,15 +1,15 @@
 using System;
 
-namespace FTG.Studios.Robol.VirtualMachine
+namespace FTG.Studios.Robol.VM
 {
 
 	public class Symbol
 	{
 
-		public string Identifier { get; protected set; }
-		public Type Type { get; protected set; }
-		public bool IsDefined { get; protected set; }
-		public object Value { get; protected set; }
+		public readonly string Identifier;
+		public readonly Type Type;
+		public bool IsDefined { get; private set; }
+		public object Value { get; private set; }
 
 		public Symbol(string identifier, Type type)
 		{

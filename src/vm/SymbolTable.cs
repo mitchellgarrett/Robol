@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Internal;
 
-namespace FTG.Studios.Robol.VirtualMachine
+namespace FTG.Studios.Robol.VM
 {
 
 	public class SymbolTable
@@ -73,7 +72,15 @@ namespace FTG.Studios.Robol.VirtualMachine
 			return parent;
 		}
 
-		public bool InsertSymbol(string identifier, Type type, object value = null)
+		public bool DeclareSymbol(string identifier, Type type) {
+			if (IsDeclared(identifier)) {
+				return false;
+			}
+			symbols.Add(identifier, new Symbol(identifier, type));
+			return true;
+		}
+
+		public bool DefineSymbol(string identifier, Type type, object value)
 		{
 			if (IsDeclared(identifier))
 			{

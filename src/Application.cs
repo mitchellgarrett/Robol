@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FTG.Studios.Robol.Compiler;
-using FTG.Studios.Robol.VirtualMachine;
+using FTG.Studios.Robol.VM;
 
 class Application
 {

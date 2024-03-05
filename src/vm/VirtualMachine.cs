@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using FTG.Studios.Robol.Compiler;
 
-namespace FTG.Studios.Robol.VirtualMachine
+namespace FTG.Studios.Robol.VM
 {
 
 	public enum MessageSeverity { Normal, Warning, Error };
@@ -33,7 +33,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 			ParseTree.FunctionList list = program.Root.List;
 			while (list != null)
 			{
-				if (!globalScope.IsDeclared(list.Function.Identifier.Value)) globalScope.InsertSymbol(list.Function.Identifier.Value, typeof(void), list.Function);
+				if (!globalScope.IsDeclared(list.Function.Identifier.Value)) globalScope.DefineSymbol(list.Function.Identifier.Value, typeof(void), list.Function);
 				list = list.List;
 			}
 
@@ -88,7 +88,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 
 		object EvaluateStatement(ParseTree.Declaration statement)
 		{
-			if (!localScope.IsDeclared(statement.Identifier.Value)) localScope.InsertSymbol(statement.Identifier.Value, statement.Type);
+			if (!localScope.IsDeclared(statement.Identifier.Value)) localScope.DeclareSymbol(statement.Identifier.Value, statement.Type);
 			Symbol symbol = localScope.GetSymbol(statement.Identifier.Value);
 			symbol.SetValue(EvaluateExpression(statement.Expression));
 			return null;
@@ -259,7 +259,7 @@ namespace FTG.Studios.Robol.VirtualMachine
 			localScope = localScope.PushAdjacentScope();
 			foreach ((string identifier, Type type, object value) in parameters)
 			{
-				localScope.InsertSymbol(identifier, type, value);
+				localScope.DefineSymbol(identifier, type, value);
 			}
 
 			object result = EvaluateFunction(function);
