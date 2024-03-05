@@ -304,7 +304,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return LeftExpression?.ToString() + (Operator != '\0' ? Operator.ToString() : null) + RightExpression?.ToString();
+				return $"({LeftExpression?.ToString()}{Operator.ToString()}{RightExpression?.ToString()})";
 			}
 		}
 
@@ -324,7 +324,7 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return LeftExpression?.ToString() + (Operator != '\0' ? Operator.ToString() : null) + RightExpression?.ToString();
+				return $"{LeftExpression?.ToString()}{Operator.ToString()}{RightExpression?.ToString()}";
 			}
 		}
 
@@ -437,8 +437,15 @@ namespace FTG.Studios.Robol.Compiler
 				return $"{Identifier}({Arguments})";
 			}
 		}
+		#endregion
 
-		public class IntegerConstant : Primary
+		#region Constants
+		public abstract class Constant : Primary
+		{
+			protected Constant(int line, int column) : base(line, column) { }
+		}
+
+		public class IntegerConstant : Constant
 		{
 
 			public readonly int Value;
@@ -454,7 +461,7 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class NumberConstant : Primary
+		public class NumberConstant : Constant
 		{
 
 			public readonly float Value;
@@ -470,7 +477,7 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class StringConstant : Primary
+		public class StringConstant : Constant
 		{
 
 			public readonly string Value;
@@ -486,7 +493,7 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class BooleanConstant : Primary
+		public class BooleanConstant : Constant
 		{
 
 			public readonly bool Value;

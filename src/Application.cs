@@ -21,6 +21,12 @@ class Application
 
 		Console.WriteLine($"File: {file_name}\n");
 
+		if (!File.Exists(file_name))
+		{
+			Console.WriteLine($"'{file_name}' does not exist!");
+			Environment.Exit(0);
+		}
+
 		string source = File.ReadAllText(file_name);
 
 		Console.WriteLine("Source code:");

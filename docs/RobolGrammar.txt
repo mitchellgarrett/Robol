@@ -3,7 +3,13 @@ FunctionList ::= Function FunctionList | null
 Function ::= ReturnType Identifier(ParameterList) { StatementList }
 
 StatementList ::= Statement StatementList | null
-Statement ::= Declaration; | Initialization; | Assignment; | FunctionCall; | return Expression; | ;
+Statement ::= DeclarationStatement | AssignmentStatement | ExpressionStatement | ReturnStatement | EmptyStatement
+
+DeclarationStatement ::= Declaration;
+AssignmentStatement = Assignment;
+ExpressionStatement ::= FunctionCall;
+ReturnStatement ::= return Expression;
+EmptyStatement ::= ;
 
 // TODO: make distinction between definition/declaration
 Declaration ::= VariableType Identifier | VariableType Identifier = Expression
@@ -19,7 +25,9 @@ ExponentialExpression ::= Primary ^ Primary
 
 LogicalExpression ::= LogicalOrExpression
 LogicalOrExpression ::= LogicalAndExpression | LogicalOrExpression or LogicalAndExpression
-LogicalAndExpression ::= LogicalAndExpression and LogicalOrExpression | null
+LogicalAndExpression ::= EqualityExpression | LogicalAndExpression and EqualityExpression
+EqualityExpression ::= RelationalExpression | EqualityExpression ==|!= RelationalExpression
+RelationalExpression ::= ArithmeticExpression | RelationalExpression <|>|<=|>= ArithmeticExpression
 
 Primary ::= Identifier | FunctionCall | (Expression) | Constant | UnaryOperator Primary
 FunctionCall ::= Identifier(ArgumentList)
@@ -30,12 +38,13 @@ Parameter ::= VariableType Identifier
 ArgumentList ::= Argument, ArgumentList | null
 Argument ::= Expression
 
-Constant ::= IntegerConstant | NumberConstant | ByteConstant | CharacterConstant | StringConstant
+Constant ::= IntegerConstant | NumberConstant | ByteConstant | CharacterConstant | StringConstant | BooleanConstant
 IntegerConstant ::= [0-9]+
 NumberConstant ::= [0-9]+(.[0-9]*)?
 ByteConstant ::= [a-fA-F0-9]
 CharacterConstant ::= '[a-zA-Z0-9]'
 StringConstant ::= "[a-zA-Z0-9]*"
+BooleanConstant ::= true|false
 
 VariableType ::= int | num | byte | char | string | obj | ClassType
 Identifier ::= ([_a-zA-Z][_a-zA-Z0-9]*)([\._a-zA-Z][_a-zA-Z0-9]*) // TODO: remove '.'

@@ -110,7 +110,9 @@ namespace FTG.Studios.Robol.Compiler
 			Syntax.Keyword keyword;
 			if ((keyword = Syntax.GetKeywordType(lexeme)) != Syntax.Keyword.Invalid)
 			{
-				return new Token(TokenType.Keyword, keyword, line, prevColumn);
+				Token token = new Token(TokenType.Keyword, keyword, line, prevColumn);
+				if (Syntax.IsBooleanConstant(keyword)) token = new Token(TokenType.BooleanConstant, keyword, line, prevColumn);
+				return token;
 			}
 
 			if (Regex.IsMatch(lexeme, Syntax.integer_literal))

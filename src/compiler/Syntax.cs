@@ -3,7 +3,7 @@
 namespace FTG.Studios.Robol.Compiler
 {
 
-	public enum TokenType { Invalid, Semicolon, OpenBrace, CloseBrace, OpenParenthesis, CloseParenthesis, Keyword, Identifier, IntegerConstant, NumberConstant, StringConstant, UnaryOperator, ExponentialOperator, MultiplicativeOperator, AdditiveOperator, Assignment, Seperator };
+	public enum TokenType { Invalid, Semicolon, OpenBrace, CloseBrace, OpenParenthesis, CloseParenthesis, Keyword, Identifier, IntegerConstant, NumberConstant, StringConstant, BooleanConstant, UnaryOperator, ExponentialOperator, MultiplicativeOperator, AdditiveOperator, Assignment, Seperator };
 
 	public static class Syntax
 	{
@@ -49,9 +49,9 @@ namespace FTG.Studios.Robol.Compiler
 
 		public enum Keyword { Invalid, Void, Integer, Number, String, Boolean, True, False, Return };
 
-		public static string GetKeyword(Keyword k)
+		public static string GetKeyword(Keyword keyword)
 		{
-			return keywords[(int)k - 1];
+			return keywords[(int)keyword - 1];
 		}
 
 		public static Keyword GetKeywordType(string s)
@@ -71,19 +71,19 @@ namespace FTG.Studios.Robol.Compiler
 			return IsVariableType(GetKeywordType(s));
 		}
 
-		public static bool IsReturnType(Keyword k)
+		public static bool IsReturnType(Keyword keyword)
 		{
-			return IsVariableType(k) || k == Keyword.Void;
+			return IsVariableType(keyword) || keyword == Keyword.Void;
 		}
 
-		public static bool IsVariableType(Keyword k)
+		public static bool IsVariableType(Keyword keyword)
 		{
-			return k == Keyword.Integer || k == Keyword.Number || k == Keyword.String | k == Keyword.Boolean;
+			return keyword == Keyword.Integer || keyword == Keyword.Number || keyword == Keyword.String | keyword == Keyword.Boolean;
 		}
 
-		public static Type GetType(Keyword k)
+		public static Type GetType(Keyword keyword)
 		{
-			switch (k)
+			switch (keyword)
 			{
 				case Keyword.Void: return typeof(void);
 				case Keyword.Integer: return typeof(int);
@@ -94,9 +94,19 @@ namespace FTG.Studios.Robol.Compiler
 			return typeof(object);
 		}
 
-		public static bool IsBooleanConstant(Keyword k)
+		public static bool IsBooleanConstant(this Keyword keyword)
 		{
-			return k == Keyword.True || k == Keyword.False;
+			return keyword == Keyword.True || keyword == Keyword.False;
+		}
+
+		public static bool GetBooleanValue(this Keyword keyword)
+		{
+			return keyword == Keyword.True;
+		}
+
+		public static bool IsConstant(this TokenType type)
+		{
+			return type == TokenType.IntegerConstant || type == TokenType.NumberConstant || type == TokenType.StringConstant || type == TokenType.BooleanConstant;
 		}
 	}
 }
