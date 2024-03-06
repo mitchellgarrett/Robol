@@ -3,7 +3,7 @@
 namespace FTG.Studios.Robol.Compiler
 {
 
-	public enum TokenType { Invalid, Semicolon, OpenBrace, CloseBrace, OpenParenthesis, CloseParenthesis, Keyword, Identifier, IntegerConstant, NumberConstant, StringConstant, BooleanConstant, UnaryOperator, ExponentialOperator, MultiplicativeOperator, AdditiveOperator, Assignment, Seperator };
+	public enum TokenType { Invalid, Semicolon, OpenBrace, CloseBrace, OpenParenthesis, CloseParenthesis, Keyword, Identifier, IntegerConstant, NumberConstant, StringConstant, BooleanConstant, UnaryOperator, ExponentialOperator, MultiplicativeOperator, AdditiveOperator, Assignment, Seperator, LogicalAndOperator, LogicalOrOperator, EqualityOperator, RelationalOperator };
 
 	public static class Syntax
 	{
@@ -30,15 +30,15 @@ namespace FTG.Studios.Robol.Compiler
 		public const char operator_negation = '!';
 		public const char operator_complement = '~';
 
-		public const string conditional_and = "&&";
-		public const string conditional_or = "||";
+		public const string operator_logical_and = "and";
+		public const string operator_logical_or = "or";
 
-		public const string comparator_equal = "==";
-		public const string comparator_not_equal = "!=";
-		public const string comparator_less = "<";
-		public const string comparator_greater = ">";
-		public const string comparator_less_equal = "<=";
-		public const string comparator_greater_equal = ">=";
+		public const string operator_equal = "==";
+		public const string operator_not_equal = "!=";
+		public const string operator_less = "<";
+		public const string operator_greater = ">";
+		public const string operator_less_equal = "<=";
+		public const string operator_greater_equal = ">=";
 
 		public const string identifier = @"^([_a-zA-Z][_a-zA-Z0-9]*)([\._a-zA-Z][_a-zA-Z0-9]*)*$"; // TODO: remove '.' once libraries are supported
 		public const string integer_literal = @"^\d+$";

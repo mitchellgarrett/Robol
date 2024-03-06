@@ -288,6 +288,86 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
+		public class LogicalOrExpression : Expression
+		{
+			public readonly LogicalAndExpression LeftExpression;
+			public readonly Expression RightExpression;
+
+			public LogicalOrExpression(LogicalAndExpression lhs, Expression rhs, int line, int column) : base(line, column)
+			{
+				this.LeftExpression = lhs;
+				this.RightExpression = rhs;
+			}
+
+			public override string ToString()
+			{
+				string output = LeftExpression.ToString();
+				if (RightExpression != null) output += $" or {RightExpression}";
+				return output;
+			}
+		}
+
+		public class LogicalAndExpression : Expression
+		{
+			public readonly EqualityExpression LeftExpression;
+			public readonly Expression RightExpression;
+
+			public LogicalAndExpression(EqualityExpression lhs, Expression rhs, int line, int column) : base(line, column)
+			{
+				this.LeftExpression = lhs;
+				this.RightExpression = rhs;
+			}
+
+			public override string ToString()
+			{
+				string output = LeftExpression.ToString();
+				if (RightExpression != null) output += $" and {RightExpression}";
+				return output;
+			}
+		}
+
+		public class EqualityExpression : Expression
+		{
+			public readonly string Operator;
+			public readonly RelationalExpression LeftExpression;
+			public readonly Expression RightExpression;
+
+			public EqualityExpression(string op, RelationalExpression lhs, Expression rhs, int line, int column) : base(line, column)
+			{
+				this.Operator = op;
+				this.LeftExpression = lhs;
+				this.RightExpression = rhs;
+			}
+
+			public override string ToString()
+			{
+				string output = LeftExpression.ToString();
+				if (RightExpression != null) output += $" {Operator} {RightExpression}";
+				return output;
+			}
+		}
+
+		public class RelationalExpression : Expression
+		{
+			public readonly string Operator;
+			public readonly ArithmeticExpression LeftExpression;
+			public readonly ArithmeticExpression RightExpression;
+
+			public RelationalExpression(string op, ArithmeticExpression lhs, ArithmeticExpression rhs, int line, int column) : base(line, column)
+			{
+				this.Operator = op;
+				this.LeftExpression = lhs;
+				this.RightExpression = rhs;
+			}
+
+			public override string ToString()
+			{
+				string output = LeftExpression.ToString();
+				if (RightExpression != null) output += $" {Operator} {RightExpression}";
+				return output;
+			}
+		}
+
 		public class ArithmeticExpression : Expression
 		{
 
@@ -304,7 +384,9 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return $"({LeftExpression?.ToString()}{Operator.ToString()}{RightExpression?.ToString()})";
+				string output = LeftExpression.ToString();
+				if (RightExpression != null) output += $" {Operator} {RightExpression}";
+				return output;
 			}
 		}
 
@@ -324,7 +406,9 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return $"{LeftExpression?.ToString()}{Operator.ToString()}{RightExpression?.ToString()}";
+				string output = LeftExpression.ToString();
+				if (RightExpression != null) output += $" {Operator} {RightExpression}";
+				return output;
 			}
 		}
 
@@ -344,56 +428,9 @@ namespace FTG.Studios.Robol.Compiler
 
 			public override string ToString()
 			{
-				return LeftExpression?.ToString() + (Operator != '\0' ? Operator.ToString() : null) + RightExpression?.ToString();
-			}
-		}
-
-		public class LogicalExpression : Expression
-		{
-			public readonly LogicalOrExpression Expression;
-
-			public LogicalExpression(LogicalOrExpression expression, int line, int column) : base(line, column)
-			{
-				this.Expression = expression;
-			}
-
-			public override string ToString()
-			{
-				return Expression.ToString();
-			}
-		}
-
-		public class LogicalOrExpression : Expression
-		{
-			public readonly LogicalOrExpression LeftExpression;
-			public readonly LogicalAndExpression RightExpression;
-
-			public LogicalOrExpression(LogicalOrExpression lhs, LogicalAndExpression rhs, int line, int column) : base(line, column)
-			{
-				this.LeftExpression = lhs;
-				this.RightExpression = rhs;
-			}
-
-			public override string ToString()
-			{
-				return $"({LeftExpression} or {RightExpression})";
-			}
-		}
-
-		public class LogicalAndExpression : Expression
-		{
-			public readonly LogicalAndExpression LeftExpression;
-			public readonly LogicalOrExpression RightExpression;
-
-			public LogicalAndExpression(LogicalAndExpression lhs, LogicalOrExpression rhs, int line, int column) : base(line, column)
-			{
-				this.LeftExpression = lhs;
-				this.RightExpression = rhs;
-			}
-
-			public override string ToString()
-			{
-				return $"({LeftExpression} and {RightExpression})";
+				string output = LeftExpression.ToString();
+				if (RightExpression != null) output += $" {Operator} {RightExpression}";
+				return output;
 			}
 		}
 		#endregion

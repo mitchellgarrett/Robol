@@ -108,13 +108,13 @@ namespace FTG.Studios.Robol.VM
 		#region Expressions
 		object EvaluateExpression(ParseTree.Expression expression)
 		{
-			if (expression is ParseTree.UnaryExpression) return EvaluateExpression(expression as ParseTree.UnaryExpression);
-			if (expression is ParseTree.ArithmeticExpression) return EvaluateExpression(expression as ParseTree.ArithmeticExpression);
-			if (expression is ParseTree.LogicalExpression) return EvaluateExpression(expression as ParseTree.LogicalExpression);
+			//if (expression is ParseTree.UnaryExpression) return EvaluateUnaryExpression(expression as ParseTree.UnaryExpression);
+			//if (expression is ParseTree.ArithmeticExpression) return EvaluateArithmeticExpression(expression as ParseTree.ArithmeticExpression);
+			if (expression is ParseTree.LogicalOrExpression) return EvaluateLogicalOrExpression(expression as ParseTree.LogicalOrExpression);
 			return null;
 		}
 
-		float EvaluateExpression(ParseTree.UnaryExpression expression)
+		float EvaluateUnaryExpression(ParseTree.UnaryExpression expression)
 		{
 			switch (expression.Operator)
 			{
@@ -126,68 +126,106 @@ namespace FTG.Studios.Robol.VM
 			return 0;
 		}
 
-		// TODO: Make these work
-		bool EvaluateExpression(ParseTree.LogicalExpression expression)
+		object EvaluateLogicalOrExpression(ParseTree.LogicalOrExpression expression)
 		{
-			return EvaluateExpression(expression.Expression);
+			object lhs = EvaluateLogicalAndExpression(expression.LeftExpression);
+			if (expression.RightExpression == null) return lhs;
+
+			bool blhs = (bool)lhs;
+			bool brhs = (bool)EvaluateExpression(expression.RightExpression);
+
+			return blhs || brhs;
 		}
 
-		bool EvaluateExpression(ParseTree.LogicalOrExpression expression)
+		object EvaluateLogicalAndExpression(ParseTree.LogicalAndExpression expression)
 		{
-			bool rhs = EvaluateExpression(expression.RightExpression);
-			if (expression.LeftExpression != null) rhs = EvaluateExpression(expression.LeftExpression) || rhs;
-			return rhs;
+			object lhs = EvaluateEqualityExpression(expression.LeftExpression);
+			if (expression.RightExpression == null) return lhs;
+
+			bool blhs = (bool)lhs;
+			bool brhs = (bool)EvaluateExpression(expression.RightExpression);
+
+			return blhs && brhs;
 		}
 
-		bool EvaluateExpression(ParseTree.LogicalAndExpression expression)
+		object EvaluateEqualityExpression(ParseTree.EqualityExpression expression)
 		{
-			return EvaluateExpression(expression.LeftExpression) && EvaluateExpression(expression.RightExpression);
+			object lhs = EvaluateRelationalExpression(expression.LeftExpression);
+			if (string.IsNullOrEmpty(expression.Operator)) return lhs;
+
+			object rhs = EvaluateExpression(expression.RightExpression);
+			switch (expression.Operator)
+			{
+				case Syntax.operator_equal: return lhs == rhs;
+				case Syntax.operator_not_equal: return lhs != rhs;
+			}
+
+			return false;
 		}
 
-		float EvaluateExpression(ParseTree.ArithmeticExpression expression)
+		object EvaluateRelationalExpression(ParseTree.RelationalExpression expression)
 		{
-			float lhs = (float)EvaluateExpression(expression.LeftExpression);
+			object lhs = EvaluateArithmeticExpression(expression.LeftExpression);
+			if (string.IsNullOrEmpty(expression.Operator)) return lhs;
+
+			dynamic lhs_numeric = lhs;
+			dynamic rhs_numeric = EvaluateArithmeticExpression(expression.RightExpression);
+			switch (expression.Operator)
+			{
+				case Syntax.operator_less: return lhs_numeric < rhs_numeric;
+				case Syntax.operator_greater: return lhs_numeric > rhs_numeric;
+				case Syntax.operator_less_equal: return lhs_numeric <= rhs_numeric;
+				case Syntax.operator_greater_equal: return lhs_numeric >= rhs_numeric;
+			}
+
+			return false;
+		}
+
+		object EvaluateArithmeticExpression(ParseTree.ArithmeticExpression expression)
+		{
+			object lhs = EvaluateMultiplicativeExpression(expression.LeftExpression);
 			if (expression.Operator == '\0') return lhs;
-			float rhs = (float)EvaluateExpression(expression.RightExpression);
+
+			dynamic lhs_numeric = lhs;
+			dynamic rhs_numeric = EvaluateExpression(expression.RightExpression);
 
 			switch (expression.Operator)
 			{
-				case Syntax.operator_addition: return lhs + rhs;
-				case Syntax.operator_subtraction: return lhs - rhs;
+				case Syntax.operator_addition: return lhs_numeric + rhs_numeric;
+				case Syntax.operator_subtraction: return lhs_numeric - rhs_numeric;
 			}
 			return 0;
 		}
 
-		float EvaluateExpression(ParseTree.MultiplicativeExpression expression)
+		object EvaluateMultiplicativeExpression(ParseTree.MultiplicativeExpression expression)
 		{
-			float lhs = (float)EvaluateExpression(expression.LeftExpression);
+			object lhs = EvaluateExponentialExpression(expression.LeftExpression);
 			if (expression.Operator == '\0') return lhs;
-			float rhs = (float)EvaluateExpression(expression.RightExpression);
+
+			dynamic lhs_numeric = lhs;
+			dynamic rhs_numeric = EvaluateExpression(expression.RightExpression);
 
 			switch (expression.Operator)
 			{
-				case Syntax.operator_multiplication: return lhs * rhs;
-				case Syntax.operator_division: return lhs / rhs;
-				case Syntax.operator_modulus: return lhs % rhs;
+				case Syntax.operator_multiplication: return lhs_numeric * rhs_numeric;
+				case Syntax.operator_division: return lhs_numeric / rhs_numeric;
+				case Syntax.operator_modulus: return lhs_numeric % rhs_numeric;
 			}
 			return 0;
 		}
 
-		float EvaluateExpression(ParseTree.ExponentialExpression expression)
+		object EvaluateExponentialExpression(ParseTree.ExponentialExpression expression)
 		{
-			float lhs =
-				expression.LeftExpression.GetType() == typeof(ParseTree.IntegerConstant)
-				? (float)(int)EvaluatePrimary(expression.LeftExpression)
-				: (float)EvaluatePrimary(expression.LeftExpression);
-
+			object lhs = EvaluatePrimary(expression.LeftExpression);
 			if (expression.Operator == '\0') return lhs;
 
-			float rhs =
-				expression.RightExpression.GetType() == typeof(ParseTree.IntegerConstant)
-				? (float)(int)EvaluatePrimary(expression.RightExpression)
-				: (float)EvaluatePrimary(expression.RightExpression);
+			dynamic lhs_numeric = lhs;
+			dynamic rhs_numeric = EvaluatePrimary(expression.RightExpression);
 
-			return (float)Math.Pow(lhs, rhs);
+			double result = Math.Pow(lhs_numeric, rhs_numeric);
+
+			if (lhs_numeric is int && rhs_numeric is int) return (int)result;
+			return (float)result;
 		}
 		#endregion
 
@@ -204,9 +242,7 @@ namespace FTG.Studios.Robol.VM
 		object EvaluateIdentifier(ParseTree.Identifier identifier)
 		{
 			Symbol symbol = localScope.GetSymbol(identifier.Value);
-
 			if (symbol == null) throw new ArgumentNullException($"Variable '{identifier.Value}' does not exist!");
-
 			return symbol.Value;
 		}
 

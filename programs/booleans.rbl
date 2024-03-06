@@ -1,4 +1,5 @@
 bool main() {
-	bool value = true;
-	return value;
+	bool x = true;
+	bool y = x and false;
+	return y;
 }

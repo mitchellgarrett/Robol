@@ -107,29 +107,51 @@ namespace FTG.Studios.Robol.Compiler
 
 		static Token BuildToken(string lexeme)
 		{
+			// Check if logical operator
+			switch (lexeme)
+			{
+				case Syntax.operator_logical_and: return new Token(TokenType.LogicalAndOperator, lexeme, line, prevColumn);
+				case Syntax.operator_logical_or: return new Token(TokenType.LogicalOrOperator, lexeme, line, prevColumn);
+
+				case Syntax.operator_equal: return new Token(TokenType.EqualityOperator, lexeme, line, prevColumn);
+				case Syntax.operator_not_equal: return new Token(TokenType.EqualityOperator, lexeme, line, prevColumn);
+
+				case Syntax.operator_less: return new Token(TokenType.RelationalOperator, lexeme, line, prevColumn);
+				case Syntax.operator_greater: return new Token(TokenType.RelationalOperator, lexeme, line, prevColumn);
+				case Syntax.operator_less_equal: return new Token(TokenType.RelationalOperator, lexeme, line, prevColumn);
+				case Syntax.operator_greater_equal: return new Token(TokenType.RelationalOperator, lexeme, line, prevColumn);
+			}
+
+			// Check if keyword
 			Syntax.Keyword keyword;
 			if ((keyword = Syntax.GetKeywordType(lexeme)) != Syntax.Keyword.Invalid)
 			{
 				Token token = new Token(TokenType.Keyword, keyword, line, prevColumn);
+
+				// Check if keyword is boolean literal
 				if (Syntax.IsBooleanConstant(keyword)) token = new Token(TokenType.BooleanConstant, keyword, line, prevColumn);
 				return token;
 			}
 
+			// Check if integer literal
 			if (Regex.IsMatch(lexeme, Syntax.integer_literal))
 			{
 				return new Token(TokenType.IntegerConstant, int.Parse(lexeme), line, prevColumn);
 			}
 
+			// Check if decimal literal
 			if (Regex.IsMatch(lexeme, Syntax.number_literal))
 			{
 				return new Token(TokenType.NumberConstant, float.Parse(lexeme), line, prevColumn);
 			}
 
+			// Check if string literal
 			if (Regex.IsMatch(lexeme, Syntax.string_literal))
 			{
 				return new Token(TokenType.StringConstant, lexeme, line, prevColumn);
 			}
 
+			// Check if identifier
 			if (Regex.IsMatch(lexeme, Syntax.identifier))
 			{
 				return new Token(TokenType.Identifier, lexeme, line, prevColumn);

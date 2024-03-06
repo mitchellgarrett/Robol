@@ -99,7 +99,7 @@ namespace FTG.Studios.Robol.Compiler
 			int line = token.Line;
 			int column = token.Column;
 
-			if (!Match(token, TokenType.Keyword) || !Syntax.IsVariableType((Syntax.Keyword)token.Value)) Fail(token);
+			if (!Match(token, TokenType.Keyword) || !Syntax.IsVariableType((Syntax.Keyword)token.Value)) Fail(token, TokenType.Keyword);
 
 			System.Type type = Syntax.GetType((Syntax.Keyword)token.Value);
 			ParseTree.Identifier identifier = ParseIdentifier(tokens);
@@ -178,7 +178,7 @@ namespace FTG.Studios.Robol.Compiler
 			int column = token.Column;
 
 			// First token must be a valid variable type
-			if (!Match(token, TokenType.Keyword) || !Syntax.IsVariableType((Syntax.Keyword)token.Value)) Fail(token);
+			if (!Match(token, TokenType.Keyword) || !Syntax.IsVariableType((Syntax.Keyword)token.Value)) Fail(token, TokenType.Keyword);
 
 			// Second token must be an identifier
 			ParseTree.Identifier identifier = ParseIdentifier(tokens);
@@ -233,10 +233,72 @@ namespace FTG.Studios.Robol.Compiler
 			return new ParseTree.Identifier(token.Value as string, line, column);
 		}
 
-		// Expression ::= UnaryExpression | ArithmeticExpression | LogicalExpression
+		// Expression ::= LogicalExpression
 		static ParseTree.Expression ParseExpression(Queue<Token> tokens)
 		{
-			return ParseArithmeticExpression(tokens);
+			return ParseLogicalOrExpression(tokens);
+		}
+
+		// LogicalOrExpression ::= LogicalAndExpression | LogicalAndExpression or Expression
+		static ParseTree.LogicalOrExpression ParseLogicalOrExpression(Queue<Token> tokens)
+		{
+			ParseTree.LogicalAndExpression lhs = ParseLogicalAndExpression(tokens);
+
+			ParseTree.Expression rhs = null;
+			if (Match(tokens.Peek(), TokenType.LogicalOrOperator))
+			{
+				tokens.Dequeue();
+				rhs = ParseExpression(tokens);
+			}
+
+			return new ParseTree.LogicalOrExpression(lhs, rhs, lhs.Line, lhs.Column);
+		}
+
+		// LogicalAndExpression ::= EqualityExpression | EqualityExpression and Expression
+		static ParseTree.LogicalAndExpression ParseLogicalAndExpression(Queue<Token> tokens)
+		{
+			ParseTree.EqualityExpression lhs = ParseEqualityExpression(tokens);
+
+			ParseTree.Expression rhs = null;
+			if (Match(tokens.Peek(), TokenType.LogicalAndOperator))
+			{
+				tokens.Dequeue();
+				rhs = ParseExpression(tokens);
+			}
+
+			return new ParseTree.LogicalAndExpression(lhs, rhs, lhs.Line, lhs.Column);
+		}
+
+		// EqualityExpression ::= RelationalExpression | RelationalExpression ==|!= Expression
+		static ParseTree.EqualityExpression ParseEqualityExpression(Queue<Token> tokens)
+		{
+			ParseTree.RelationalExpression lhs = ParseRelationalExpression(tokens);
+
+			ParseTree.Expression rhs = null;
+			string op = null;
+			if (Match(tokens.Peek(), TokenType.EqualityOperator))
+			{
+				op = (string)tokens.Dequeue().Value;
+				rhs = ParseExpression(tokens);
+			}
+
+			return new ParseTree.EqualityExpression(op, lhs, rhs, lhs.Line, lhs.Column);
+		}
+
+		// RelationalExpression ::= ArithmeticExpression | ArithmeticExpression <|>|<=|>= ArithmeticExpression
+		static ParseTree.RelationalExpression ParseRelationalExpression(Queue<Token> tokens)
+		{
+			ParseTree.ArithmeticExpression lhs = ParseArithmeticExpression(tokens);
+
+			ParseTree.ArithmeticExpression rhs = null;
+			string op = null;
+			if (Match(tokens.Peek(), TokenType.RelationalOperator))
+			{
+				op = (string)tokens.Dequeue().Value;
+				rhs = ParseArithmeticExpression(tokens);
+			}
+
+			return new ParseTree.RelationalExpression(op, lhs, rhs, lhs.Line, lhs.Column);
 		}
 
 		// ArithmeticExpression ::= MultiplicativeExpression +|- Expression
@@ -245,10 +307,10 @@ namespace FTG.Studios.Robol.Compiler
 			ParseTree.MultiplicativeExpression multiplicative = ParseMultiplicativeExpression(tokens);
 
 			if (!Match(tokens.Peek(), TokenType.AdditiveOperator)) return new ParseTree.ArithmeticExpression('\0', multiplicative, null, multiplicative.Line, multiplicative.Column);
-			Token token = tokens.Dequeue();
+			char op = (char)tokens.Dequeue().Value;
 
 			ParseTree.Expression expression = ParseExpression(tokens);
-			return new ParseTree.ArithmeticExpression((char)token.Value, multiplicative, expression, multiplicative.Line, multiplicative.Column);
+			return new ParseTree.ArithmeticExpression(op, multiplicative, expression, multiplicative.Line, multiplicative.Column);
 		}
 
 		// MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
@@ -274,10 +336,6 @@ namespace FTG.Studios.Robol.Compiler
 			ParseTree.Primary rhs = ParsePrimary(tokens);
 			return new ParseTree.ExponentialExpression((char)token.Value, lhs, rhs, lhs.Line, lhs.Column);
 		}
-
-		// LogicalExpression ::= LogicalOrExpression
-		// LogicalOrExpression ::= LogicalAndExpression | LogicalOrExpression or LogicalAndExpression
-		// LogicalAndExpression ::= LogicalAndExpression and LogicalOrExpression | null
 
 		// Primary ::= Identifier | FunctionCall | (Expression) | Constant | UnaryOperator Primary
 		static ParseTree.Primary ParsePrimary(Queue<Token> tokens)
@@ -305,15 +363,16 @@ namespace FTG.Studios.Robol.Compiler
 				return expression;
 			}
 
-			if (!Match(token, TokenType.UnaryOperator) && !Match(token, TokenType.AdditiveOperator, Syntax.operator_subtraction)) Fail(token);
+			if (!Match(token, TokenType.UnaryOperator) && !Match(token, TokenType.AdditiveOperator, Syntax.operator_subtraction)) Fail(token, TokenType.UnaryOperator);
 			ParseTree.Primary primary = ParsePrimary(tokens);
 			return new ParseTree.UnaryExpression((char)token.Value, primary, token.Line, token.Column);
 		}
+
 		// Constant ::= IntegerConstant | NumberConstant | StringConstant | BooleanConstant
 		static ParseTree.Constant ParseConstant(Queue<Token> tokens)
 		{
 			Token token = tokens.Dequeue();
-			if (!token.Type.IsConstant()) Fail(token);
+			if (!token.Type.IsConstant()) Fail(token, TokenType.Invalid, "Constant");
 
 			if (Match(token, TokenType.IntegerConstant))
 			{
@@ -337,7 +396,7 @@ namespace FTG.Studios.Robol.Compiler
 					return new ParseTree.BooleanConstant(keyword.GetBooleanValue(), token.Line, token.Column);
 			}
 
-			Fail(token);
+			Fail(token, TokenType.Invalid, "Constant");
 			return null;
 		}
 

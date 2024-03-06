@@ -15,7 +15,7 @@ EmptyStatement ::= ;
 Declaration ::= VariableType Identifier | VariableType Identifier = Expression
 Assignment ::= Identifier = Expression
 
-Expression ::= UnaryExpression | ArithmeticExpression | LogicalExpression
+Expression ::= UnaryExpression | LogicalExpression
 
 UnaryExpression ::= ???
 
@@ -24,10 +24,10 @@ MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
 ExponentialExpression ::= Primary ^ Primary
 
 LogicalExpression ::= LogicalOrExpression
-LogicalOrExpression ::= LogicalAndExpression | LogicalOrExpression or LogicalAndExpression
-LogicalAndExpression ::= EqualityExpression | LogicalAndExpression and EqualityExpression
-EqualityExpression ::= RelationalExpression | EqualityExpression ==|!= RelationalExpression
-RelationalExpression ::= ArithmeticExpression | RelationalExpression <|>|<=|>= ArithmeticExpression
+LogicalOrExpression ::= LogicalAndExpression | LogicalAndExpression or Expression
+LogicalAndExpression ::= EqualityExpression | EqualityExpression and Expression
+EqualityExpression ::= RelationalExpression | RelationalExpression ==|!= Expression
+RelationalExpression ::= ArithmeticExpression | ArithmeticExpression <|>|<=|>= ArithmeticExpression
 
 Primary ::= Identifier | FunctionCall | (Expression) | Constant | UnaryOperator Primary
 FunctionCall ::= Identifier(ArgumentList)
