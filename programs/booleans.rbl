@@ -1,5 +1,6 @@
 bool main() {
 	bool x = true;
 	bool y = x and false;
-	return y;
+	bool z = true or x and y;
+	return z;
 }
