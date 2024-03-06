@@ -319,10 +319,10 @@ namespace FTG.Studios.Robol.Compiler
 			ParseTree.ExponentialExpression exponential = ParseExponentialExpression(tokens);
 
 			if (!Match(tokens.Peek(), TokenType.MultiplicativeOperator)) return new ParseTree.MultiplicativeExpression('\0', exponential, null, exponential.Line, exponential.Column);
-			Token token = tokens.Dequeue();
+			char op = (char)tokens.Dequeue().Value;
 
 			ParseTree.Expression expression = ParseExpression(tokens);
-			return new ParseTree.MultiplicativeExpression((char)token.Value, exponential, expression, exponential.Line, exponential.Column);
+			return new ParseTree.MultiplicativeExpression(op, exponential, expression, exponential.Line, exponential.Column);
 		}
 
 		// ExponentialExpression::= Primary ^ Primary
@@ -331,10 +331,10 @@ namespace FTG.Studios.Robol.Compiler
 			ParseTree.Primary lhs = ParsePrimary(tokens);
 
 			if (!Match(tokens.Peek(), TokenType.ExponentialOperator)) return new ParseTree.ExponentialExpression('\0', lhs, null, lhs.Line, lhs.Column);
-			Token token = tokens.Dequeue();
+			char op = (char)tokens.Dequeue().Value;
 
 			ParseTree.Primary rhs = ParsePrimary(tokens);
-			return new ParseTree.ExponentialExpression((char)token.Value, lhs, rhs, lhs.Line, lhs.Column);
+			return new ParseTree.ExponentialExpression(op, lhs, rhs, lhs.Line, lhs.Column);
 		}
 
 		// Primary ::= Identifier | FunctionCall | (Expression) | Constant | UnaryOperator Primary
