@@ -288,7 +288,12 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class LogicalOrExpression : Expression
+		public abstract class LogicalExpression : Expression
+		{
+			public LogicalExpression(int line, int column) : base(line, column) { }
+		}
+
+		public class LogicalOrExpression : LogicalExpression
 		{
 			public readonly LogicalAndExpression LeftExpression;
 			public readonly Expression RightExpression;
@@ -368,14 +373,19 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class ArithmeticExpression : Expression
+		public abstract class ArithmeticExpression : Expression
+		{
+			public ArithmeticExpression(int line, int column) : base(line, column) { }
+		}
+
+		public class AdditiveExpression : ArithmeticExpression
 		{
 
 			public readonly char Operator;
 			public readonly MultiplicativeExpression LeftExpression;
 			public readonly Expression RightExpression;
 
-			public ArithmeticExpression(char op, MultiplicativeExpression lhs, Expression rhs, int line, int column) : base(line, column)
+			public AdditiveExpression(char op, MultiplicativeExpression lhs, Expression rhs, int line, int column) : base(line, column)
 			{
 				this.Operator = op;
 				this.LeftExpression = lhs;

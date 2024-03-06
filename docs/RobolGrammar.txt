@@ -11,7 +11,6 @@ ExpressionStatement ::= FunctionCall;
 ReturnStatement ::= return Expression;
 EmptyStatement ::= ;
 
-// TODO: make distinction between definition/declaration
 Declaration ::= VariableType Identifier | VariableType Identifier = Expression
 Assignment ::= Identifier = Expression
 
@@ -19,15 +18,16 @@ Expression ::= UnaryExpression | LogicalExpression
 
 UnaryExpression ::= ???
 
-ArithmeticExpression ::= MultiplicativeExpression +|- Expression
-MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
-ExponentialExpression ::= Primary ^ Primary
-
 LogicalExpression ::= LogicalOrExpression
 LogicalOrExpression ::= LogicalAndExpression | LogicalAndExpression or Expression
 LogicalAndExpression ::= EqualityExpression | EqualityExpression and Expression
 EqualityExpression ::= RelationalExpression | RelationalExpression ==|!= Expression
 RelationalExpression ::= ArithmeticExpression | ArithmeticExpression <|>|<=|>= ArithmeticExpression
+
+ArithmeticExpression ::= AdditiveExpression
+AdditiveExpression ::= MultiplicativeExpression +|- Expression
+MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
+ExponentialExpression ::= Primary ^ Primary
 
 Primary ::= Identifier | FunctionCall | (Expression) | Constant | UnaryOperator Primary
 FunctionCall ::= Identifier(ArgumentList)

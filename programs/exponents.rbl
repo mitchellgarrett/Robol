@@ -1,0 +1,6 @@
+int main() {
+	int base = 2;
+	int exponent = 5;
+	int value = base ^ exponent;
+	return value;
+}

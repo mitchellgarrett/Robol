@@ -75,18 +75,18 @@ namespace FTG.Studios.Robol.VM
 
 		object EvaluateStatement(ParseTree.Statement statement)
 		{
-			if (statement is ParseTree.Return) return EvaluateStatement(statement as ParseTree.Return);
-			if (statement is ParseTree.Declaration) return EvaluateStatement(statement as ParseTree.Declaration);
-			if (statement is ParseTree.Assignment) return EvaluateStatement(statement as ParseTree.Assignment);
+			if (statement is ParseTree.Return) return EvaluateReturnStatement(statement as ParseTree.Return);
+			if (statement is ParseTree.Declaration) return EvaluateDeclarationStatement(statement as ParseTree.Declaration);
+			if (statement is ParseTree.Assignment) return EvaluateAssignmentStatement(statement as ParseTree.Assignment);
 			return null;
 		}
 
-		object EvaluateStatement(ParseTree.Return statement)
+		object EvaluateReturnStatement(ParseTree.Return statement)
 		{
 			return EvaluateExpression(statement.Expression);
 		}
 
-		object EvaluateStatement(ParseTree.Declaration statement)
+		object EvaluateDeclarationStatement(ParseTree.Declaration statement)
 		{
 			if (!localScope.IsDeclared(statement.Identifier.Value)) localScope.DeclareSymbol(statement.Identifier.Value, statement.Type);
 			Symbol symbol = localScope.GetSymbol(statement.Identifier.Value);
@@ -94,7 +94,7 @@ namespace FTG.Studios.Robol.VM
 			return null;
 		}
 
-		object EvaluateStatement(ParseTree.Assignment statement)
+		object EvaluateAssignmentStatement(ParseTree.Assignment statement)
 		{
 			Symbol symbol = localScope.GetSymbol(statement.Identifier.Value);
 
@@ -108,10 +108,7 @@ namespace FTG.Studios.Robol.VM
 		#region Expressions
 		object EvaluateExpression(ParseTree.Expression expression)
 		{
-			//if (expression is ParseTree.UnaryExpression) return EvaluateUnaryExpression(expression as ParseTree.UnaryExpression);
-			//if (expression is ParseTree.ArithmeticExpression) return EvaluateArithmeticExpression(expression as ParseTree.ArithmeticExpression);
-			if (expression is ParseTree.LogicalOrExpression) return EvaluateLogicalOrExpression(expression as ParseTree.LogicalOrExpression);
-			return null;
+			return EvaluateLogicalExpression(expression as ParseTree.LogicalExpression);
 		}
 
 		float EvaluateUnaryExpression(ParseTree.UnaryExpression expression)
@@ -124,6 +121,12 @@ namespace FTG.Studios.Robol.VM
 						: -EvaluateNumberConstant(expression.Primary as ParseTree.NumberConstant);
 			}
 			return 0;
+		}
+
+		#region Logical Expressions
+		object EvaluateLogicalExpression(ParseTree.LogicalExpression expression)
+		{
+			return EvaluateLogicalOrExpression(expression as ParseTree.LogicalOrExpression);
 		}
 
 		object EvaluateLogicalOrExpression(ParseTree.LogicalOrExpression expression)
@@ -180,8 +183,15 @@ namespace FTG.Studios.Robol.VM
 
 			return false;
 		}
+		#endregion
 
+		#region Arithmetic Expressions
 		object EvaluateArithmeticExpression(ParseTree.ArithmeticExpression expression)
+		{
+			return EvaluateAdditiveExpression(expression as ParseTree.AdditiveExpression);
+		}
+
+		object EvaluateAdditiveExpression(ParseTree.AdditiveExpression expression)
 		{
 			object lhs = EvaluateMultiplicativeExpression(expression.LeftExpression);
 			if (expression.Operator == '\0') return lhs;
@@ -227,6 +237,7 @@ namespace FTG.Studios.Robol.VM
 			if (lhs_numeric is int && rhs_numeric is int) return (int)result;
 			return (float)result;
 		}
+		#endregion
 		#endregion
 
 		#region Primaries

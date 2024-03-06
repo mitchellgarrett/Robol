@@ -236,6 +236,12 @@ namespace FTG.Studios.Robol.Compiler
 		// Expression ::= LogicalExpression
 		static ParseTree.Expression ParseExpression(Queue<Token> tokens)
 		{
+			return ParseLogicalExpression(tokens);
+		}
+
+		// LogicalExpression ::= LogicalOrExpression
+		static ParseTree.LogicalExpression ParseLogicalExpression(Queue<Token> tokens)
+		{
 			return ParseLogicalOrExpression(tokens);
 		}
 
@@ -301,28 +307,42 @@ namespace FTG.Studios.Robol.Compiler
 			return new ParseTree.RelationalExpression(op, lhs, rhs, lhs.Line, lhs.Column);
 		}
 
-		// ArithmeticExpression ::= MultiplicativeExpression +|- Expression
+		// ArithmeticExpression ::= AdditiveExpression
 		static ParseTree.ArithmeticExpression ParseArithmeticExpression(Queue<Token> tokens)
 		{
-			ParseTree.MultiplicativeExpression multiplicative = ParseMultiplicativeExpression(tokens);
+			return ParseAdditiveExpression(tokens);
+		}
 
-			if (!Match(tokens.Peek(), TokenType.AdditiveOperator)) return new ParseTree.ArithmeticExpression('\0', multiplicative, null, multiplicative.Line, multiplicative.Column);
-			char op = (char)tokens.Dequeue().Value;
+		// AdditiveExpression ::= MultiplicativeExpression +|- Expression
+		static ParseTree.AdditiveExpression ParseAdditiveExpression(Queue<Token> tokens)
+		{
+			ParseTree.MultiplicativeExpression lhs = ParseMultiplicativeExpression(tokens);
 
-			ParseTree.Expression expression = ParseExpression(tokens);
-			return new ParseTree.ArithmeticExpression(op, multiplicative, expression, multiplicative.Line, multiplicative.Column);
+			ParseTree.Expression rhs = null;
+			char op = '\0';
+			if (Match(tokens.Peek(), TokenType.AdditiveOperator))
+			{
+				op = (char)tokens.Dequeue().Value;
+				rhs = ParseExpression(tokens);
+			}
+
+			return new ParseTree.AdditiveExpression(op, lhs, rhs, lhs.Line, lhs.Column);
 		}
 
 		// MultiplicativeExpression ::= ExponentialExpression *|/|% Expression
 		static ParseTree.MultiplicativeExpression ParseMultiplicativeExpression(Queue<Token> tokens)
 		{
-			ParseTree.ExponentialExpression exponential = ParseExponentialExpression(tokens);
+			ParseTree.ExponentialExpression lhs = ParseExponentialExpression(tokens);
 
-			if (!Match(tokens.Peek(), TokenType.MultiplicativeOperator)) return new ParseTree.MultiplicativeExpression('\0', exponential, null, exponential.Line, exponential.Column);
-			char op = (char)tokens.Dequeue().Value;
+			ParseTree.Expression rhs = null;
+			char op = '\0';
+			if (Match(tokens.Peek(), TokenType.MultiplicativeOperator))
+			{
+				op = (char)tokens.Dequeue().Value;
+				rhs = ParseExpression(tokens);
+			}
 
-			ParseTree.Expression expression = ParseExpression(tokens);
-			return new ParseTree.MultiplicativeExpression(op, exponential, expression, exponential.Line, exponential.Column);
+			return new ParseTree.MultiplicativeExpression(op, lhs, rhs, lhs.Line, lhs.Column);
 		}
 
 		// ExponentialExpression::= Primary ^ Primary
@@ -330,10 +350,14 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			ParseTree.Primary lhs = ParsePrimary(tokens);
 
-			if (!Match(tokens.Peek(), TokenType.ExponentialOperator)) return new ParseTree.ExponentialExpression('\0', lhs, null, lhs.Line, lhs.Column);
-			char op = (char)tokens.Dequeue().Value;
+			ParseTree.Primary rhs = null;
+			char op = '\0';
+			if (Match(tokens.Peek(), TokenType.ExponentialOperator))
+			{
+				op = (char)tokens.Dequeue().Value;
+				rhs = ParsePrimary(tokens);
+			}
 
-			ParseTree.Primary rhs = ParsePrimary(tokens);
 			return new ParseTree.ExponentialExpression(op, lhs, rhs, lhs.Line, lhs.Column);
 		}
 

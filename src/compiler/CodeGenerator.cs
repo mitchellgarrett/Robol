@@ -81,15 +81,15 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			if (statement == null) return string.Empty;
 
-			if (statement is ParseTree.Return) return GenerateStatement(statement as ParseTree.Return);
-			if (statement is ParseTree.Declaration) return GenerateStatement(statement as ParseTree.Declaration);
+			if (statement is ParseTree.Return) return GenerateReturnStatement(statement as ParseTree.Return);
+			if (statement is ParseTree.Declaration) return GenerateDeclarationStatement(statement as ParseTree.Declaration);
 			//if (statement is ParseTree.Assignment) output = Generate(statement as ParseTree.Assignment);
 
 			Console.Error.WriteLine($"ERROR: GenerateStatement did not produce any code ({statement})");
 			return string.Empty;
 		}
 
-		static string GenerateStatement(ParseTree.Return statement)
+		static string GenerateReturnStatement(ParseTree.Return statement)
 		{
 			string output = GenerateExpression(statement.Expression);
 			string temporary = GetCurrentTemporaryVariable();
@@ -97,7 +97,7 @@ namespace FTG.Studios.Robol.Compiler
 			return output;
 		}
 
-		static string GenerateStatement(ParseTree.Declaration statement)
+		static string GenerateDeclarationStatement(ParseTree.Declaration statement)
 		{
 			string variable = statement.Identifier.Value;
 
@@ -114,14 +114,19 @@ namespace FTG.Studios.Robol.Compiler
 			if (expression == null) return string.Empty;
 
 			//if (expression is ParseTree.UnaryExpression) return Generate(expression as ParseTree.UnaryExpression);
-			if (expression is ParseTree.ArithmeticExpression) return GenerateExpression(expression as ParseTree.ArithmeticExpression);
+			if (expression is ParseTree.ArithmeticExpression) return GenerateArithmeticExpression(expression as ParseTree.ArithmeticExpression);
 			Console.Error.WriteLine($"ERROR: GenerateExpression did not produce any code ({expression})");
 			return string.Empty;
 		}
 
-		static string GenerateExpression(ParseTree.ArithmeticExpression expression)
+		static string GenerateArithmeticExpression(ParseTree.ArithmeticExpression expression)
 		{
-			string output = GenerateExpression(expression.LeftExpression);
+			return GenerateAdditiveExpression(expression as ParseTree.AdditiveExpression);
+		}
+
+		static string GenerateAdditiveExpression(ParseTree.AdditiveExpression expression)
+		{
+			string output = GenerateMultiplicativeExpression(expression.LeftExpression);
 			string lhs = GetCurrentTemporaryVariable();
 
 			if (expression.Operator == '\0') return output;
@@ -134,9 +139,9 @@ namespace FTG.Studios.Robol.Compiler
 			return output;
 		}
 
-		static string GenerateExpression(ParseTree.MultiplicativeExpression expression)
+		static string GenerateMultiplicativeExpression(ParseTree.MultiplicativeExpression expression)
 		{
-			string output = GenerateExpression(expression.LeftExpression);
+			string output = GenerateExponentialExpression(expression.LeftExpression);
 			string lhs = GetCurrentTemporaryVariable();
 
 			if (expression.Operator == '\0') return output;
@@ -149,7 +154,7 @@ namespace FTG.Studios.Robol.Compiler
 			return output;
 		}
 
-		static string GenerateExpression(ParseTree.ExponentialExpression expression)
+		static string GenerateExponentialExpression(ParseTree.ExponentialExpression expression)
 		{
 			string output = GeneratePrimary(expression.LeftExpression);
 			string lhs = GetCurrentTemporaryVariable();
