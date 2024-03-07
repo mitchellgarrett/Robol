@@ -144,20 +144,20 @@ namespace FTG.Studios.Robol.Compiler
 			string condition = GenerateExpression(statement.Condition);
 			string condition_value = GetCurrentTemporaryVariable();
 
-			string false_block = GenerateStatementList(statement.FalseBlock);
-
 			string true_label = GetNextTemporaryLabel();
-			string true_block = GenerateStatementList(statement.TrueBlock);
 
+			string output = condition;
+			output += $"{indentation}if {condition_value} goto {true_label}\n";
+
+			IncreaseIndentation();
+			string false_block = GenerateStatementList(statement.FalseBlock);
+			string true_block = GenerateStatementList(statement.TrueBlock);
 			string end_label = GetNextTemporaryLabel();
 
-			string output = $"{indentation}{condition}";
-			output += $"{indentation}if {condition_value} goto {true_label}\n";
-			IncreaseIndentation();
-			if (!string.IsNullOrWhiteSpace(false_block)) output += $"{indentation}{false_block}";
+			output += false_block;
 			output += $"{indentation}goto {end_label}\n";
-			output += $"{indentation}{true_label}:\n";
-			output += $"{indentation}{true_block}";
+			output += $"{true_label}:\n";
+			output += true_block;
 			output += $"{end_label}:\n";
 			DecreaseIndentation();
 
