@@ -86,7 +86,8 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			if (statement is ParseTree.ReturnStatement) return GenerateReturnStatement(statement as ParseTree.ReturnStatement);
 			if (statement is ParseTree.DeclarationStatement) return GenerateDeclarationStatement(statement as ParseTree.DeclarationStatement);
-			//if (statement is ParseTree.Assignment) output = Generate(statement as ParseTree.Assignment);
+			if (statement is ParseTree.AssignmentStatement) return GenerateAssignmentStatement(statement as ParseTree.AssignmentStatement);
+			if (statement is ParseTree.SelectionStatement) return GenerateSelectionStatement(statement as ParseTree.SelectionStatement);
 
 			Console.Error.WriteLine($"ERROR: GenerateStatement did not produce any code ({statement})");
 			return string.Empty;
@@ -116,6 +117,49 @@ namespace FTG.Studios.Robol.Compiler
 			}*/
 
 			output += $"{indentation}{variable} = {temporary}\n";
+
+			return output;
+		}
+
+		static string GenerateAssignmentStatement(ParseTree.AssignmentStatement statement)
+		{
+			string variable = statement.Identifier.Value;
+
+			string output = GenerateExpression(statement.Expression);
+			string temporary = GetCurrentTemporaryVariable();
+
+			output += $"{indentation}{variable} = {temporary}\n";
+
+			return output;
+		}
+
+		static string GenerateSelectionStatement(ParseTree.SelectionStatement statement)
+		{
+			if (statement is ParseTree.IfStatement) return GenerateIfStatement(statement as ParseTree.IfStatement);
+			return null;
+		}
+
+		static string GenerateIfStatement(ParseTree.IfStatement statement)
+		{
+			string condition = GenerateExpression(statement.Condition);
+			string condition_value = GetCurrentTemporaryVariable();
+
+			string false_block = GenerateStatementList(statement.FalseBlock);
+
+			string true_label = GetNextTemporaryLabel();
+			string true_block = GenerateStatementList(statement.TrueBlock);
+
+			string end_label = GetNextTemporaryLabel();
+
+			string output = $"{indentation}{condition}";
+			output += $"{indentation}if {condition_value} goto {true_label}\n";
+			IncreaseIndentation();
+			if (!string.IsNullOrWhiteSpace(false_block)) output += $"{indentation}{false_block}";
+			output += $"{indentation}goto {end_label}\n";
+			output += $"{indentation}{true_label}:\n";
+			output += $"{indentation}{true_block}";
+			output += $"{end_label}:\n";
+			DecreaseIndentation();
 
 			return output;
 		}
@@ -183,7 +227,7 @@ namespace FTG.Studios.Robol.Compiler
 			string lhs = GetCurrentTemporaryVariable();
 			output += GenerateArithmeticExpression(expression.RightExpression);
 			string rhs = GetCurrentTemporaryVariable();
-			string result = GetNextTemporaryLabel();
+			string result = GetNextTemporaryVariable();
 			output += $"{indentation}{result} = {lhs} {expression.Operator} {rhs}\n";
 
 			return output;
