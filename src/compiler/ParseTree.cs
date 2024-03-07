@@ -209,14 +209,14 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class Declaration : Statement
+		public class DeclarationStatement : Statement
 		{
 
 			public readonly Type Type;
 			public readonly Identifier Identifier;
 			public readonly Expression Expression;
 
-			public Declaration(Type type, Identifier identifier, Expression expression, int line, int column) : base(line, column)
+			public DeclarationStatement(Type type, Identifier identifier, Expression expression, int line, int column) : base(line, column)
 			{
 				this.Type = type;
 				this.Identifier = identifier;
@@ -229,13 +229,13 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class Assignment : Statement
+		public class AssignmentStatement : Statement
 		{
 
 			public readonly Identifier Identifier;
 			public readonly Expression Expression;
 
-			public Assignment(Identifier identifier, Expression expression, int line, int column) : base(line, column)
+			public AssignmentStatement(Identifier identifier, Expression expression, int line, int column) : base(line, column)
 			{
 				this.Identifier = identifier;
 				this.Expression = expression;
@@ -247,19 +247,45 @@ namespace FTG.Studios.Robol.Compiler
 			}
 		}
 
-		public class Return : Statement
+		public class ReturnStatement : Statement
 		{
 
 			public readonly Expression Expression;
 
-			public Return(Expression expression, int line, int column) : base(line, column)
+			public ReturnStatement(Expression expression, int line, int column) : base(line, column)
 			{
 				this.Expression = expression;
 			}
 
 			public override string ToString()
 			{
-				return "return <" + Expression.ToString() + ">";
+				return $"return <{Expression}>";
+			}
+		}
+
+		public class SelectionStatement : Statement
+		{
+			public SelectionStatement(int line, int column) : base(line, column) { }
+		}
+
+		public class IfStatement : SelectionStatement
+		{
+			public readonly Expression Condition;
+			public readonly StatementList TrueBlock;
+			public readonly StatementList FalseBlock;
+
+			public IfStatement(Expression condition, StatementList trueBlock, StatementList falseBlock, int line, int column) : base(line, column)
+			{
+				this.Condition = condition;
+				this.TrueBlock = trueBlock;
+				this.FalseBlock = falseBlock;
+			}
+
+			public override string ToString()
+			{
+				string output = $"if ({Condition}) then {TrueBlock}";
+				if (FalseBlock != null) output += $" else {FalseBlock}";
+				return output;
 			}
 		}
 		#endregion

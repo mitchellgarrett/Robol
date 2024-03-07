@@ -141,36 +141,35 @@ namespace FTG.Studios.Robol.Compiler
 			return new ParseTree.StatementList(statement, list, statement.Line, statement.Column);
 		}
 
-		// Statement ::= DeclarationStatement | AssignmentStatement | ExpressionStatement | ReturnStatement | EmptyStatement
+		// Statement ::= DeclarationStatement | AssignmentStatement | ExpressionStatement | SelectionStatement | ReturnStatement | EmptyStatement
 		public static ParseTree.Statement ParseStatement(Queue<Token> tokens)
 		{
-			ParseTree.Statement statement = null;
-
 			// DeclarationStatement ::= Declaration;
 			// If the first token is a variable type, then the statment is a variable declaration
-			if (Match(tokens.Peek(), TokenType.Keyword) && Syntax.IsVariableType((Syntax.Keyword)tokens.Peek().Value)) statement = ParseDeclaration(tokens);
+			if (Match(tokens.Peek(), TokenType.Keyword) && Syntax.IsVariableType((Syntax.Keyword)tokens.Peek().Value)) return ParseDeclarationStatement(tokens);
 
 			// AssignmentStatement ::= Assignment;
 			// If this first token is an identifier followed by an '=', then the statement is a variable assignment
-			else if (Match(tokens.Peek(), TokenType.Identifier)) statement = ParseAssignment(tokens);
+			else if (Match(tokens.Peek(), TokenType.Identifier)) return ParseAssignmentStatement(tokens);
 
 			// TODO: add parse functioncall (ExpressionStatement)
 
 			// ReturnStatement ::= return Expression;
 			// If the first token is the return keyword, then it is a return statement
-			else if (Match(tokens.Peek(), TokenType.Keyword, Syntax.Keyword.Return)) statement = ParseReturn(tokens);
+			else if (Match(tokens.Peek(), TokenType.Keyword, Syntax.Keyword.Return)) return ParseReturnStatement(tokens);
 
-			// All statements must end with a semicolon
-			if (statement != null) MatchFail(tokens.Dequeue(), TokenType.Semicolon);
+			// SelectionStatement ::= IfStatement
+			else if (Match(tokens.Peek(), TokenType.Keyword, Syntax.Keyword.If)) return ParseIfStatement(tokens);
+
 
 			// EmptyStatement ::= ;
-			else if (Match(tokens.Peek(), TokenType.Semicolon)) tokens.Dequeue();
+			if (Match(tokens.Peek(), TokenType.Semicolon)) tokens.Dequeue();
 
-			return statement;
+			return null;
 		}
 
 		// Declaration ::= Type Identifier | Type Identifier = Expression
-		static ParseTree.Declaration ParseDeclaration(Queue<Token> tokens)
+		static ParseTree.DeclarationStatement ParseDeclarationStatement(Queue<Token> tokens)
 		{
 			Token token = tokens.Dequeue();
 
@@ -192,11 +191,15 @@ namespace FTG.Studios.Robol.Compiler
 				expression = ParseExpression(tokens);
 			}
 
-			return new ParseTree.Declaration(Syntax.GetType((Syntax.Keyword)token.Value), identifier, expression, line, column);
+			ParseTree.DeclarationStatement statement = new ParseTree.DeclarationStatement(Syntax.GetType((Syntax.Keyword)token.Value), identifier, expression, line, column);
+
+			MatchFail(tokens.Dequeue(), TokenType.Semicolon);
+
+			return statement;
 		}
 
 		// Assignment ::= Identifier = Expression
-		static ParseTree.Assignment ParseAssignment(Queue<Token> tokens)
+		static ParseTree.AssignmentStatement ParseAssignmentStatement(Queue<Token> tokens)
 		{
 			// First token must be a variable identifier
 			ParseTree.Identifier identifier = ParseIdentifier(tokens);
@@ -206,18 +209,66 @@ namespace FTG.Studios.Robol.Compiler
 
 			// The '=' must be followed by an expression
 			ParseTree.Expression expression = ParseExpression(tokens);
+			ParseTree.AssignmentStatement statement = new ParseTree.AssignmentStatement(identifier, expression, identifier.Line, identifier.Column);
 
-			return new ParseTree.Assignment(identifier, expression, identifier.Line, identifier.Column);
+			MatchFail(tokens.Dequeue(), TokenType.Semicolon);
+
+			return statement;
 		}
 
 		// Return ::= return Expression
-		static ParseTree.Return ParseReturn(Queue<Token> tokens)
+		static ParseTree.ReturnStatement ParseReturnStatement(Queue<Token> tokens)
 		{
 			MatchFail(tokens.Dequeue(), TokenType.Keyword, Syntax.Keyword.Return);
 			ParseTree.Expression expression = ParseExpression(tokens);
-			ParseTree.Return statement = new ParseTree.Return(expression, expression.Line, expression.Column);
+			ParseTree.ReturnStatement statement = new ParseTree.ReturnStatement(expression, expression.Line, expression.Column);
 
+			MatchFail(tokens.Dequeue(), TokenType.Semicolon);
 			return statement;
+		}
+
+		// IfStatement ::= if ( Expression ) { StatementList } | ( Expression ) { StatementList } else { StatementList } | ( Expression ) { StatementList } else IfStatement 
+		static ParseTree.IfStatement ParseIfStatement(Queue<Token> tokens)
+		{
+			int line = tokens.Peek().Line;
+			int column = tokens.Peek().Column;
+
+			// If statement must begin with 'if (' 
+			MatchFail(tokens.Dequeue(), TokenType.Keyword, Syntax.Keyword.If);
+			MatchFail(tokens.Dequeue(), TokenType.OpenParenthesis);
+
+			// Parse if condition
+			ParseTree.Expression condition = ParseExpression(tokens);
+
+			// If condition must end in ')' and '{' must start body
+			MatchFail(tokens.Dequeue(), TokenType.CloseParenthesis);
+			MatchFail(tokens.Dequeue(), TokenType.OpenBrace);
+
+			ParseTree.StatementList true_block = ParseStatementList(tokens);
+
+			// Must have matching '}'
+			MatchFail(tokens.Dequeue(), TokenType.CloseBrace);
+
+			// Check for else block
+			ParseTree.StatementList false_block = null;
+			if (Match(tokens.Peek(), TokenType.Keyword, Syntax.Keyword.Else))
+			{
+				tokens.Dequeue();
+
+				if (Match(tokens.Peek(), TokenType.Keyword, Syntax.Keyword.If))
+				{
+					ParseTree.IfStatement next_if_statement = ParseIfStatement(tokens);
+					false_block = new ParseTree.StatementList(next_if_statement, null, next_if_statement.Line, next_if_statement.Column);
+				}
+				else
+				{
+					MatchFail(tokens.Dequeue(), TokenType.OpenBrace);
+					false_block = ParseStatementList(tokens);
+					MatchFail(tokens.Dequeue(), TokenType.CloseBrace);
+				}
+			}
+
+			return new ParseTree.IfStatement(condition, true_block, false_block, line, column);
 		}
 
 		// Identifier

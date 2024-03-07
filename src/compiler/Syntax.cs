@@ -45,9 +45,9 @@ namespace FTG.Studios.Robol.Compiler
 		public const string number_literal = @"^((\d+(\.\d*)?)|(\.\d+))$";
 		public const string string_literal = @"^""[a-zA-Z0-9]+""$";
 
-		public static readonly string[] keywords = new string[] { "void", "int", "num", "str", "bool", "true", "false", "return" };
+		public static readonly string[] keywords = new string[] { "void", "int", "num", "str", "bool", "true", "false", "return", "if", "else" };
 
-		public enum Keyword { Invalid, Void, Integer, Number, String, Boolean, True, False, Return };
+		public enum Keyword { Invalid, Void, Integer, Number, String, Boolean, True, False, Return, If, Else };
 
 		public static string GetKeyword(Keyword keyword)
 		{

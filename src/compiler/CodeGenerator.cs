@@ -24,6 +24,7 @@ namespace FTG.Studios.Robol.Compiler
 			return GenerateProgram(program.Root);
 		}
 
+		#region Utility Functions
 		static string GetCurrentTemporaryVariable()
 		{
 			return $"{TEMPORARY_VARIABLE_PREFIX}{nextTemporaryVariableIndex - 1}";
@@ -53,7 +54,9 @@ namespace FTG.Studios.Robol.Compiler
 		{
 			indentation = indentation.Substring(0, indentation.Length - 1);
 		}
+		#endregion
 
+		#region Program
 		static string GenerateProgram(ParseTree.Program program)
 		{
 			string output = GenerateFunction(program.Main);
@@ -68,7 +71,9 @@ namespace FTG.Studios.Robol.Compiler
 			DecreaseIndentation();
 			return output;
 		}
+		#endregion
 
+		#region Statements
 		static string GenerateStatementList(ParseTree.StatementList list)
 		{
 			if (list == null) return string.Empty;
@@ -79,17 +84,15 @@ namespace FTG.Studios.Robol.Compiler
 
 		static string GenerateStatement(ParseTree.Statement statement)
 		{
-			if (statement == null) return string.Empty;
-
-			if (statement is ParseTree.Return) return GenerateReturnStatement(statement as ParseTree.Return);
-			if (statement is ParseTree.Declaration) return GenerateDeclarationStatement(statement as ParseTree.Declaration);
+			if (statement is ParseTree.ReturnStatement) return GenerateReturnStatement(statement as ParseTree.ReturnStatement);
+			if (statement is ParseTree.DeclarationStatement) return GenerateDeclarationStatement(statement as ParseTree.DeclarationStatement);
 			//if (statement is ParseTree.Assignment) output = Generate(statement as ParseTree.Assignment);
 
 			Console.Error.WriteLine($"ERROR: GenerateStatement did not produce any code ({statement})");
 			return string.Empty;
 		}
 
-		static string GenerateReturnStatement(ParseTree.Return statement)
+		static string GenerateReturnStatement(ParseTree.ReturnStatement statement)
 		{
 			string output = GenerateExpression(statement.Expression);
 			string temporary = GetCurrentTemporaryVariable();
@@ -97,28 +100,97 @@ namespace FTG.Studios.Robol.Compiler
 			return output;
 		}
 
-		static string GenerateDeclarationStatement(ParseTree.Declaration statement)
+		static string GenerateDeclarationStatement(ParseTree.DeclarationStatement statement)
 		{
 			string variable = statement.Identifier.Value;
 
 			string output = GenerateExpression(statement.Expression);
 			string temporary = GetCurrentTemporaryVariable();
 
+			// Hack to see if expression is just a constant assignment
+			/*if (output.Split("\n").Length == 2)
+			{
+				nextTemporaryVariableIndex--;
+				output = output.Substring(output.IndexOf("= "));
+				Console.WriteLine("we got em");
+			}*/
+
 			output += $"{indentation}{variable} = {temporary}\n";
 
 			return output;
 		}
+		#endregion
 
+		#region Expressions
 		static string GenerateExpression(ParseTree.Expression expression)
 		{
-			if (expression == null) return string.Empty;
-
-			//if (expression is ParseTree.UnaryExpression) return Generate(expression as ParseTree.UnaryExpression);
-			if (expression is ParseTree.ArithmeticExpression) return GenerateArithmeticExpression(expression as ParseTree.ArithmeticExpression);
-			Console.Error.WriteLine($"ERROR: GenerateExpression did not produce any code ({expression})");
-			return string.Empty;
+			return GenerateLogicalExpression(expression as ParseTree.LogicalExpression);
 		}
 
+		#region Logical Expressions
+		static string GenerateLogicalExpression(ParseTree.LogicalExpression expression)
+		{
+			return GenerateLogicalOrExpression(expression as ParseTree.LogicalOrExpression);
+		}
+
+		static string GenerateLogicalOrExpression(ParseTree.LogicalOrExpression expression)
+		{
+			string output = GenerateLogicalAndExpression(expression.LeftExpression);
+			if (expression.RightExpression == null) return output;
+
+			string lhs = GetCurrentTemporaryVariable();
+			output += GenerateExpression(expression.RightExpression);
+			string rhs = GetCurrentTemporaryVariable();
+			string result = GetNextTemporaryLabel();
+			output += $"{indentation}{result} = {lhs} || {rhs}\n";
+
+			return output;
+		}
+
+		static string GenerateLogicalAndExpression(ParseTree.LogicalAndExpression expression)
+		{
+			string output = GenerateEqualityExpression(expression.LeftExpression);
+			if (expression.RightExpression == null) return output;
+
+			string lhs = GetCurrentTemporaryVariable();
+			output += GenerateExpression(expression.RightExpression);
+			string rhs = GetCurrentTemporaryVariable();
+			string result = GetNextTemporaryLabel();
+			output += $"{indentation}{result} = {lhs} && {rhs}\n";
+
+			return output;
+		}
+
+		static string GenerateEqualityExpression(ParseTree.EqualityExpression expression)
+		{
+			string output = GenerateRelationalExpression(expression.LeftExpression);
+			if (expression.RightExpression == null) return output;
+
+			string lhs = GetCurrentTemporaryVariable();
+			output += GenerateExpression(expression.RightExpression);
+			string rhs = GetCurrentTemporaryVariable();
+			string result = GetNextTemporaryLabel();
+			output += $"{indentation}{result} = {lhs} {expression.Operator} {rhs}\n";
+
+			return output;
+		}
+
+		static string GenerateRelationalExpression(ParseTree.RelationalExpression expression)
+		{
+			string output = GenerateArithmeticExpression(expression.LeftExpression);
+			if (expression.RightExpression == null) return output;
+
+			string lhs = GetCurrentTemporaryVariable();
+			output += GenerateArithmeticExpression(expression.RightExpression);
+			string rhs = GetCurrentTemporaryVariable();
+			string result = GetNextTemporaryLabel();
+			output += $"{indentation}{result} = {lhs} {expression.Operator} {rhs}\n";
+
+			return output;
+		}
+		#endregion
+
+		#region Arithmetic Expressions
 		static string GenerateArithmeticExpression(ParseTree.ArithmeticExpression expression)
 		{
 			return GenerateAdditiveExpression(expression as ParseTree.AdditiveExpression);
@@ -127,10 +199,9 @@ namespace FTG.Studios.Robol.Compiler
 		static string GenerateAdditiveExpression(ParseTree.AdditiveExpression expression)
 		{
 			string output = GenerateMultiplicativeExpression(expression.LeftExpression);
-			string lhs = GetCurrentTemporaryVariable();
-
 			if (expression.Operator == '\0') return output;
 
+			string lhs = GetCurrentTemporaryVariable();
 			output += GenerateExpression(expression.RightExpression);
 			string rhs = GetCurrentTemporaryVariable();
 			string temporary = GetNextTemporaryVariable();
@@ -142,10 +213,9 @@ namespace FTG.Studios.Robol.Compiler
 		static string GenerateMultiplicativeExpression(ParseTree.MultiplicativeExpression expression)
 		{
 			string output = GenerateExponentialExpression(expression.LeftExpression);
-			string lhs = GetCurrentTemporaryVariable();
-
 			if (expression.Operator == '\0') return output;
 
+			string lhs = GetCurrentTemporaryVariable();
 			output += GenerateExpression(expression.RightExpression);
 			string rhs = GetCurrentTemporaryVariable();
 			string temporary = GetNextTemporaryVariable();
@@ -157,10 +227,9 @@ namespace FTG.Studios.Robol.Compiler
 		static string GenerateExponentialExpression(ParseTree.ExponentialExpression expression)
 		{
 			string output = GeneratePrimary(expression.LeftExpression);
-			string lhs = GetCurrentTemporaryVariable();
-
 			if (expression.Operator == '\0') return output;
 
+			string lhs = GetCurrentTemporaryVariable();
 			output += GeneratePrimary(expression.RightExpression);
 			string rhs = GetCurrentTemporaryVariable();
 			string temporary = GetNextTemporaryVariable();
@@ -168,66 +237,71 @@ namespace FTG.Studios.Robol.Compiler
 
 			return output;
 		}
+		#endregion
+		#endregion
 
+		#region Primaries
 		static string GeneratePrimary(ParseTree.Primary primary)
 		{
-			if (primary == null) return string.Empty;
-
-			if (primary is ParseTree.Identifier) return GeneratePrimary(primary as ParseTree.Identifier);
-			if (primary is ParseTree.FunctionCall) return GeneratePrimary(primary as ParseTree.FunctionCall);
-			if (primary is ParseTree.IntegerConstant) return GeneratePrimary(primary as ParseTree.IntegerConstant);
-			if (primary is ParseTree.NumberConstant) return GeneratePrimary(primary as ParseTree.NumberConstant);
-			if (primary is ParseTree.StringConstant) return GeneratePrimary(primary as ParseTree.StringConstant);
-			if (primary is ParseTree.BooleanConstant) return GeneratePrimary(primary as ParseTree.BooleanConstant);
-			if (primary is ParseTree.Expression) return GeneratePrimary(primary as ParseTree.Expression);
+			if (primary is ParseTree.Identifier) return GenerateIdentifier(primary as ParseTree.Identifier);
+			if (primary is ParseTree.Constant) return GenerateConstant(primary as ParseTree.Constant);
+			if (primary is ParseTree.Expression) return GenerateExpression(primary as ParseTree.Expression);
+			if (primary is ParseTree.FunctionCall) return GenerateFunctionCall(primary as ParseTree.FunctionCall);
 
 			Console.Error.WriteLine($"ERROR: GeneratePrimary did not produce any code ({primary})");
 			return string.Empty;
 		}
 
-		static string GeneratePrimary(ParseTree.Identifier primary)
+		static string GenerateIdentifier(ParseTree.Identifier primary)
 		{
 			string temporary = GetNextTemporaryVariable();
 			string value = primary.Value;
 			return $"{indentation}{temporary} = {value}\n";
 		}
 
-		static string GeneratePrimary(ParseTree.FunctionCall primary)
+		static string GenerateFunctionCall(ParseTree.FunctionCall primary)
 		{
 			return $"{indentation}call {primary.Identifier}\n";
 		}
 
-		static string GeneratePrimary(ParseTree.IntegerConstant primary)
+		static string GenerateConstant(ParseTree.Constant constant)
+		{
+			if (constant is ParseTree.IntegerConstant) return GenerateIntegerConstant(constant as ParseTree.IntegerConstant);
+			if (constant is ParseTree.NumberConstant) return GenerateNumberConstant(constant as ParseTree.NumberConstant);
+			if (constant is ParseTree.StringConstant) return GenerateStringConstant(constant as ParseTree.StringConstant);
+			if (constant is ParseTree.BooleanConstant) return GenerateBooleanConstant(constant as ParseTree.BooleanConstant);
+
+			Console.Error.WriteLine($"ERROR: GenerateConstant did not produce any code ({constant})");
+			return null;
+		}
+
+		static string GenerateIntegerConstant(ParseTree.IntegerConstant constant)
 		{
 			string temporary = GetNextTemporaryVariable();
-			string value = primary.Value.ToString();
+			string value = constant.Value.ToString();
 			return $"{indentation}{temporary} = {value}\n";
 		}
 
-		static string GeneratePrimary(ParseTree.NumberConstant primary)
+		static string GenerateNumberConstant(ParseTree.NumberConstant constant)
 		{
 			string temporary = GetNextTemporaryVariable();
-			string value = primary.Value.ToString();
+			string value = constant.Value.ToString();
 			return $"{indentation}{temporary} = {value}\n";
 		}
 
-		static string GeneratePrimary(ParseTree.StringConstant primary)
+		static string GenerateStringConstant(ParseTree.StringConstant constant)
 		{
 			string temporary = GetNextTemporaryVariable();
-			string value = $"\"{primary.Value}\"";
+			string value = $"\"{constant.Value}\"";
 			return $"{indentation}{temporary} = {value}\n";
 		}
 
-		static string GeneratePrimary(ParseTree.BooleanConstant primary)
+		static string GenerateBooleanConstant(ParseTree.BooleanConstant constant)
 		{
 			string temporary = GetNextTemporaryVariable();
-			string value = primary.Value.ToString();
+			string value = constant.Value.ToString().ToLower();
 			return $"{indentation}{temporary} = {value}\n";
 		}
-
-		static string GeneratePrimary(ParseTree.Expression primary)
-		{
-			return GenerateExpression(primary);
-		}
+		#endregion
 	}
 }

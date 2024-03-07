@@ -1,15 +1,21 @@
 ﻿Program ::= FunctionList
 FunctionList ::= Function FunctionList | null
-Function ::= ReturnType Identifier(ParameterList) { StatementList }
+Function ::= ReturnType Identifier( ParameterList ) { StatementList }
 
 StatementList ::= Statement StatementList | null
-Statement ::= DeclarationStatement | AssignmentStatement | ExpressionStatement | ReturnStatement | EmptyStatement
+Statement ::= DeclarationStatement | AssignmentStatement | ExpressionStatement | SelectionStatement | ReturnStatement | EmptyStatement
 
 DeclarationStatement ::= Declaration;
 AssignmentStatement = Assignment;
 ExpressionStatement ::= FunctionCall;
 ReturnStatement ::= return Expression;
 EmptyStatement ::= ;
+
+SelectionStatement ::= IfStatement
+IfStatement 
+	  ::= if ( Expression ) { StatementList } 
+		| ( Expression ) { StatementList } else { StatementList } 
+		| ( Expression ) { StatementList } else IfStatement 
 
 Declaration ::= VariableType Identifier | VariableType Identifier = Expression
 Assignment ::= Identifier = Expression
