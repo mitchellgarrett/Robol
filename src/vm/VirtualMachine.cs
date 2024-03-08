@@ -68,19 +68,22 @@ namespace FTG.Studios.Robol.VM
 		object EvaluateStatementList(ParseTree.StatementList list)
 		{
 			if (list == null) return null;
-			if (list.Statement is ParseTree.ReturnStatement) return EvaluateStatement(list.Statement as ParseTree.ReturnStatement);
-			EvaluateStatement(list.Statement);
+			object result = EvaluateStatement(list.Statement);
+			if (result != null) return result;
 			return EvaluateStatementList(list.List);
 		}
 
 		object EvaluateStatement(ParseTree.Statement statement)
 		{
-			if (statement is ParseTree.ReturnStatement) return EvaluateReturnStatement(statement as ParseTree.ReturnStatement);
+			object result = null;
+
+			if (statement is ParseTree.ReturnStatement) result = EvaluateReturnStatement(statement as ParseTree.ReturnStatement);
 			else if (statement is ParseTree.DeclarationStatement) EvaluateDeclarationStatement(statement as ParseTree.DeclarationStatement);
 			else if (statement is ParseTree.AssignmentStatement) EvaluateAssignmentStatement(statement as ParseTree.AssignmentStatement);
-			else if (statement is ParseTree.SelectionStatement) EvaluateSelectionStatement(statement as ParseTree.SelectionStatement);
+			else if (statement is ParseTree.SelectionStatement) result = EvaluateSelectionStatement(statement as ParseTree.SelectionStatement);
 			else throw new ArgumentNullException($"({statement.Line}, {statement.Column}): '{statement}'", $"Invalid statement");
-			return null;
+
+			return result;
 		}
 
 		object EvaluateReturnStatement(ParseTree.ReturnStatement statement)
@@ -104,37 +107,39 @@ namespace FTG.Studios.Robol.VM
 			symbol.SetValue(EvaluateExpression(statement.Expression));
 		}
 
-		void EvaluateSelectionStatement(ParseTree.SelectionStatement statement)
+		object EvaluateSelectionStatement(ParseTree.SelectionStatement statement)
 		{
-			if (statement is ParseTree.IfStatement) EvaluateIfStatement(statement as ParseTree.IfStatement);
+			if (statement is ParseTree.IfStatement) return EvaluateIfStatement(statement as ParseTree.IfStatement);
+			return null;
 		}
 
-		void EvaluateIfStatement(ParseTree.IfStatement statement)
+		object EvaluateIfStatement(ParseTree.IfStatement statement)
 		{
 			object condition = EvaluateExpression(statement.Condition);
 			if (!(condition is bool)) throw new ArgumentNullException($"({statement.Line}, {statement.Column}): '{statement}'", $"Expression does not resolve to boolean");
 
-			if ((bool)condition) EvaluateStatementList(statement.TrueBlock);
-			else EvaluateStatementList(statement.FalseBlock);
+			if ((bool)condition) return EvaluateStatementList(statement.TrueBlock);
+			else return EvaluateStatementList(statement.FalseBlock);
 		}
 		#endregion
 
 		#region Expressions
 		object EvaluateExpression(ParseTree.Expression expression)
 		{
-			return EvaluateLogicalExpression(expression as ParseTree.LogicalExpression);
+			if (expression is ParseTree.UnaryExpression) return EvaluateUnaryExpression(expression as ParseTree.UnaryExpression);
+			if (expression is ParseTree.LogicalExpression) return EvaluateLogicalExpression(expression as ParseTree.LogicalExpression);
+			return null;
 		}
 
-		float EvaluateUnaryExpression(ParseTree.UnaryExpression expression)
+		object EvaluateUnaryExpression(ParseTree.UnaryExpression expression)
 		{
 			switch (expression.Operator)
 			{
 				case Syntax.operator_subtraction:
-					return expression.Primary.GetType() == typeof(ParseTree.IntegerConstant)
-						? -EvaluateIntegerConstant(expression.Primary as ParseTree.IntegerConstant)
-						: -EvaluateNumberConstant(expression.Primary as ParseTree.NumberConstant);
+					dynamic value = EvaluatePrimary(expression.Primary);
+					return -value;
 			}
-			return 0;
+			return null;
 		}
 
 		#region Logical Expressions
